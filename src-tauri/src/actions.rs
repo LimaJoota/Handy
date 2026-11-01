@@ -939,20 +939,13 @@ impl ShortcutAction for CancelAction {
 }
 
 // Test Action
-/// Brings back the last transcript in the overlay's recovery card, for a
-/// paste that didn't land. Nothing touches the clipboard until Copy.
+/// Brings back the last few transcripts in the overlay's recovery card, for
+/// a paste that didn't land. Nothing touches the clipboard until Copy.
 struct ShowLastTranscriptAction;
 
 impl ShortcutAction for ShowLastTranscriptAction {
     fn start(&self, app: &AppHandle, _binding_id: &str, _shortcut_str: &str) {
-        let history_manager = app.state::<Arc<HistoryManager>>();
-        match history_manager.get_latest_completed_entry() {
-            Ok(Some(entry)) => {
-                crate::overlay::show_paste_recovery(app, crate::tray::last_transcript_text(&entry))
-            }
-            Ok(None) => debug!("No transcript to show yet"),
-            Err(e) => error!("Failed to fetch the last transcript: {}", e),
-        }
+        crate::overlay::show_paste_recovery(app, None);
     }
 
     fn stop(&self, _app: &AppHandle, _binding_id: &str, _shortcut_str: &str) {}

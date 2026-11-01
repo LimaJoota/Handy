@@ -229,7 +229,7 @@ fn spawn_waiter(pending: Arc<Mutex<MacPending>>, app_handle: AppHandle) {
             if let Some(transcript) = lost_transcript {
                 recovery_offered = true;
                 info!("[reliable-paste] no read after the chord; offering the transcript back");
-                crate::overlay::show_paste_recovery(&app_handle, &transcript);
+                crate::overlay::show_paste_recovery(&app_handle, Some(&transcript));
             }
             if let WaitDecision::Finish = decision {
                 break state_snapshot;

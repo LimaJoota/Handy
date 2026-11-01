@@ -422,7 +422,7 @@ fn on_timer(_hwnd: HWND, shared: &WinTxShared) {
         .unwrap_or(false);
     if lost && !shared.recovery_offered.swap(true, Ordering::Relaxed) {
         info!("[reliable-paste] no read after the chord; offering the transcript back");
-        crate::overlay::show_paste_recovery(&shared.app_handle, &shared.text);
+        crate::overlay::show_paste_recovery(&shared.app_handle, Some(&shared.text));
     }
     let finish = {
         let mut st = match shared.state.lock() {

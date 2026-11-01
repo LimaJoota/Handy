@@ -33,6 +33,8 @@ const SLOW_MODEL_LOAD_MS = 2000;
 // How long the paste-recovery card stays up; resting the pointer on it holds it.
 const RECOVERY_VISIBLE_MS = 10000;
 
+type RecoveryPayload = { texts: string[]; lost: boolean };
+
 const RecordingOverlay: React.FC = () => {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
@@ -69,8 +71,12 @@ const RecordingOverlay: React.FC = () => {
   // True once live text overflows the cap. A top overlay fades its top edge only
   // while overflowing, so the resting first line stays crisp flush under the pill.
   const [overflowing, setOverflowing] = useState(false);
-  // Transcript offered back when a paste didn't land (see show_paste_recovery).
-  const [recoveryText, setRecoveryText] = useState("");
+  // Recent transcripts offered back (see show_paste_recovery); `lost` means
+  // the first one is a paste that didn't land.
+  const [recovery, setRecovery] = useState<RecoveryPayload>({
+    texts: [],
+    lost: false,
+  });
   const [recoveryHeld, setRecoveryHeld] = useState(false);
 
   const smoothedLevelsRef = useRef<number[]>(Array(16).fill(0));
@@ -124,9 +130,9 @@ const RecordingOverlay: React.FC = () => {
         setCaptureReady(false);
       });
 
-      const unlistenRecovery = await listen<string>(
-        "paste-recovery-text",
-        (event) => setRecoveryText(event.payload),
+      const unlistenRecovery = await listen<RecoveryPayload>(
+        "paste-recovery-texts",
+        (event) => setRecovery(event.payload),
       );
 
       const unlistenReady = await listen("recording-ready", () => {
@@ -230,7 +236,7 @@ const RecordingOverlay: React.FC = () => {
       RECOVERY_VISIBLE_MS,
     );
     return () => clearTimeout(id);
-  }, [state, isVisible, recoveryHeld, recoveryText]);
+  }, [state, isVisible, recoveryHeld, recovery]);
 
   // Each fresh streaming session starts pinned to the bottom, fade cleared.
   useEffect(() => {
@@ -322,23 +328,27 @@ const RecordingOverlay: React.FC = () => {
           onMouseEnter={() => setRecoveryHeld(true)}
           onMouseLeave={() => setRecoveryHeld(false)}
         >
-          <div className="stext">
-            <div className="stext-clip">
-              <div className="stext-cap">
-                <p>{recoveryText}</p>
+          <div className="srecover-list">
+            {recovery.texts.map((text, index) => (
+              <div className="srecover-row" key={index}>
+                <p>{text}</p>
+                <button
+                  className="scopy"
+                  onClick={() => commands.copyPasteRecoveryText(index)}
+                >
+                  {t("overlay.recovery.copy")}
+                </button>
               </div>
-            </div>
+            ))}
           </div>
           <div className="sbase">
             <div className="sbase-l" />
-            <span className="swork-label">{t("overlay.recovery.title")}</span>
+            <span className="swork-label">
+              {recovery.lost
+                ? t("overlay.recovery.title")
+                : t("tray.recentTranscripts")}
+            </span>
             <div className="sbase-r">
-              <button
-                className="scopy"
-                onClick={() => commands.copyPasteRecoveryText()}
-              >
-                {t("overlay.recovery.copy")}
-              </button>
               <button
                 className="sx"
                 aria-label={t("overlay.recovery.close")}

@@ -571,11 +571,12 @@ async cancelOperation() : Promise<void> {
     await TAURI_INVOKE("cancel_operation");
 },
 /**
- * Copies the recovery transcript (the user clicked Copy) and closes the card.
+ * Copies the recovery card's `index`th transcript (the user clicked its Copy)
+ * and closes the card.
  */
-async copyPasteRecoveryText() : Promise<Result<null, string>> {
+async copyPasteRecoveryText(index: number) : Promise<Result<null, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("copy_paste_recovery_text") };
+    return { status: "ok", data: await TAURI_INVOKE("copy_paste_recovery_text", { index }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
