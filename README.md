@@ -1,492 +1,177 @@
-# Handy
-
-> **LimaJoota fork.** Upstream Handy plus:
->
-> - **Accent color:** Pink, System, Purple or Custom (About → Accent Color)
-> - **Word replacements:** exact find and replace, from cjpais/Handy#1533
-> - **Paste recovery:** if the target app doesn't read the paste, the overlay offers the text back. Option+Shift+H lists the last 5
-> - **Recent transcripts in the tray menu:** click one to copy it
->
-> The clipboard only changes when you click Copy. macOS build in [Releases](https://github.com/LimaJoota/Handy/releases) (Apple Silicon, not notarized: the first launch needs System Settings → Privacy & Security → Open Anyway). Upstream: [cjpais/Handy](https://github.com/cjpais/Handy).
-
-[![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/WVBeWsNXK4)
-
-**A free, open source, and extensible speech-to-text application that works completely offline.**
-
-Handy is a cross-platform desktop application that provides simple, privacy-focused speech transcription. Press a shortcut, speak, and have your words appear in any text field. This happens on your own computer without sending any information to the cloud.
-
-## Why Handy?
-
-Handy was created to fill the gap for a truly open source, extensible speech-to-text tool. As stated on [handy.computer](https://handy.computer):
-
-- **Free**: Accessibility tooling belongs in everyone's hands, not behind a paywall
-- **Open Source**: Together we can build further. Extend Handy for yourself and contribute to something bigger
-- **Private**: Your voice stays on your computer. Get transcriptions without sending audio to the cloud
-- **Simple**: One tool, one job. Transcribe what you say and put it into a text box
-
-## How It Works
-
-1. **Press** a configurable keyboard shortcut: hold it to record and release to stop, or tap it to toggle recording on and off (Hold-only and Toggle-only modes are also available)
-2. **Speak** your words while the shortcut is active
-3. **Release** and Handy processes your speech using Whisper
-4. **Get** your transcribed text pasted directly into whatever app you're using
-
-The process is entirely local:
-
-- Silence is filtered using VAD (Voice Activity Detection) with Silero
-- Transcription uses your choice of models:
-  - **Whisper models** (Small/Medium/Turbo/Large) with GPU acceleration when available
-  - **Parakeet V3** - CPU-optimized model with excellent performance and automatic language detection
-- Works on Windows, macOS, and Linux
-
-## Quick Start
-
-### Installation
-
-1. Download the latest release from the [releases page](https://github.com/cjpais/Handy/releases) or the [website](https://handy.computer)
-   - **macOS**: Also available via [Homebrew cask](https://formulae.brew.sh/cask/handy): `brew install --cask handy`
-   - **Windows**: Also available via [winget](https://github.com/microsoft/winget-pkgs): `winget install cjpais.Handy` \
-     **Note:** The Homebrew cask and winget package are not maintained by the Handy developers.
-   - **Debian/Ubuntu**: Install the downloaded `.deb` with APT so required dependencies are installed automatically:
-     ```bash
-     sudo apt install ./Handy_*.deb
-     ```
-     Do not use `dpkg -i` unless the dependencies are already installed. If you already used it, run `sudo apt --fix-broken install`.
-2. Install the application
-3. Launch Handy and grant necessary system permissions (microphone, accessibility)
-4. Configure your preferred keyboard shortcuts in Settings
-5. Start transcribing!
-
-### Development Setup
-
-For detailed build instructions including platform-specific requirements, see [BUILD.md](BUILD.md).
-
-## Sponsors
-
 <div align="center">
-  We're grateful for the support of our sponsors who help make Handy possible:
-  <br><br>
-  <a href="https://wordcab.com">
-    <img src="sponsor-images/wordcab.png" alt="Wordcab" width="120" height="120">
-  </a>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://github.com/epicenter-so/epicenter">
-    <img src="sponsor-images/epicenter.png" alt="Epicenter" width="120" height="120">
-  </a>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://boltai.com?utm_source=handy">
-    <img src="sponsor-images/boltai.jpg" alt="Bolt AI" width="120" height="120">
-  </a>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://cantydigital.com.au/">
-    <img src="sponsor-images/cantydigital.png" alt="Canty Digital" width="120" height="120">
-  </a>
+
+# Handy, tuned
+
+**A fork of [Handy](https://github.com/cjpais/Handy), the offline speech-to-text app, built around one rule: what you dictate never gets lost, and it reads like you wrote it.**
+
+[Download for macOS](https://github.com/LimaJoota/Handy/releases/latest) · [What changed](#what-changed) · [Design notes](#design-notes) · [Build](#build-from-source) · [Upstream README](https://github.com/cjpais/Handy#readme)
+
+<img src="docs/fork/settings-purple.jpg" width="560" alt="Handy settings with the purple accent">
+
 </div>
 
-## Integrations
+---
 
-<a href="https://www.raycast.com/mattiacolombomc/handy" title="Install Handy Raycast Extension"><img src="https://www.raycast.com/mattiacolombomc/handy/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt="Install handy Raycast Extension" /></a>
+## Why this fork
 
-Control Handy from [Raycast](https://www.raycast.com) — start/stop recording, browse transcript history, manage dictionary, switch models and languages.
+I dictate all day in Portuguese: messages, specs, prompts, notes. Handy got the hard part right (fast, local, private), but three things kept costing me time:
 
-[Source](https://github.com/mattiacolombomc/raycast-handy) · by [@mattiacolombomc](https://github.com/mattiacolombomc)
+1. **No punctuation.** The default streaming model wrote everything as one long run-on sentence.
+2. **Lost text.** When a paste didn't land (focus moved, no text field), the transcript was gone unless I dug through History.
+3. **Names it always got wrong.** The app's own name came out as "Randy", and the fuzzy custom-words matcher couldn't fix it without breaking ordinary words.
 
-### Debug Mode
+Plus the pink. Upstream has declined accent-color PRs twice ([#1232](https://github.com/cjpais/Handy/pull/1232), [#551](https://github.com/cjpais/Handy/pull/551)) and says visual preferences belong in forks, while [#1212](https://github.com/cjpais/Handy/discussions/1212) keeps collecting votes. So this is that fork.
 
-Handy includes an advanced debug mode for development and troubleshooting. Access it by pressing:
+Everything here stays local. Nothing is sent anywhere, and the clipboard is never touched without a click.
 
-- **macOS**: `Cmd+Shift+D`
-- **Windows/Linux**: `Ctrl+Shift+D`
+## What changed
 
-### CLI Parameters
+|     | Feature                                                                                       | Where                             |
+| --- | --------------------------------------------------------------------------------------------- | --------------------------------- |
+| 🎨  | **Accent color**: Pink, System, Purple or any custom color                                    | About → Accent Color              |
+| ✍️  | **Real punctuation in Portuguese** by switching to Parakeet TDT 0.6B v3 (benchmarked below)   | Models                            |
+| 🔁  | **Exact word replacements**: `Randy → Handy`, no fuzzy guessing                               | Advanced → Word Replacements      |
+| 🛟  | **Paste recovery**: if the target app never reads the paste, the overlay offers the text back | Automatic, with reliable paste on |
+| ⌥⇧H | **Last 5 transcripts on demand**, each with its own Copy                                      | Shortcut, rebindable in General   |
+| 📋  | **Last 5 transcripts in the menu bar**, one click to copy                                     | Handy's tray menu                 |
 
-Handy supports command-line flags for controlling a running instance and customizing startup behavior. These work on all platforms (macOS, Windows, Linux). Largely this is a beta feature.
+## Design notes
 
-**Remote control flags** (sent to an already-running instance via the single-instance plugin):
+### 🎨 Accent color
 
-```bash
-handy --toggle-transcription    # Toggle recording on/off
-handy --toggle-post-process     # Toggle recording with post-processing on/off
-handy --cancel                  # Cancel the current operation
+**What.** One setting next to Theme: Pink (the brand default), System, Purple, or Custom with a color picker. It recolors buttons, switches, highlights, the wordmark and the recording overlay, in light and dark.
+
+<p align="center"><img src="docs/fork/accent-picker.jpg" width="620" alt="Accent Color setting with Pink, System, Purple and Custom"></p>
+
+**How.** Handy's palette already flows from three source tokens in [`theme.css`](src/styles/theme.css): a light pastel, a dark pastel and a strong shade for filled controls. Every other color is a `color-mix()` of those. So the feature doesn't touch a single component: it sets `data-accent` on the document root and overrides only those three tokens.
+
+```css
+:root[data-accent="system"] {
+  --accent-base: AccentColor;
+}
+:root[data-accent="custom"] {
+  --accent-base: var(--accent-custom);
+}
+
+:root[data-accent="system"],
+:root[data-accent="custom"] {
+  --light-color-logo-primary: color-mix(in srgb, var(--accent-base) 50%, #fff);
+  --dark-color-logo-primary: color-mix(in srgb, var(--accent-base) 70%, #fff);
+  --color-background-ui: var(--accent-base);
+}
 ```
 
-**Startup flags:**
+**Decisions.**
 
-```bash
-handy --start-hidden            # Start without showing the main window
-handy --no-tray                 # Start without the system tray icon
-handy --debug                   # Enable debug mode with verbose logging
-handy --help                    # Show all available flags
-```
+- **System uses the CSS `AccentColor` keyword.** I checked in a bare `WKWebView` that WebKit resolves it to `NSColor.controlAccentColor` (`rgb(0, 122, 255)` with the default macOS accent) and that `color-mix()` works on top of it. Change your Mac's accent and Handy follows. Webviews that don't support the keyword simply don't offer the option.
+- **One base color in, a full palette out.** System and Custom derive the pastel pair by mixing toward white, calibrated so the brand pink would come out close to its hand-picked values.
+- **The overlay is a separate webview**, so it can't see the settings window's DOM. It re-reads the setting on an `accent-changed` event, the same pattern upstream uses for the theme.
+- **No flash on launch.** The choice is mirrored to `localStorage` and applied before React mounts; `AppSettings` stays the source of truth.
+- **The mascot's tongue stays pink.** It's a tongue.
 
-Flags can be combined for autostart scenarios:
+### ✍️ Punctuation: pick the right model, don't bolt on a fixer
 
-```bash
-handy --start-hidden --no-tray
-```
+I ran the same real Portuguese dictation clips through each candidate with Handy's own headless CLI (`handy --transcribe-file`), on an M4:
 
-> **macOS tip:** When Handy is installed as an app bundle, invoke the binary directly:
+| Model                                     | Punctuation                        | Time per clip   |
+| ----------------------------------------- | ---------------------------------- | --------------- |
+| Nemotron Streaming 3.5 (previous default) | almost none                        | streaming       |
+| Whisper Large v3 Turbo (Q8)               | commas, but misses sentence breaks | 1.3 – 3.8 s     |
+| **Parakeet TDT 0.6B v3 (Q8)**             | **commas, `?`, `!`, capitals**     | **0.1 – 0.4 s** |
+
+Same clip, before and after:
+
+> **Nemotron:** Inclua também um modelo com vírgulas né porque pelo amor de Deus está faltando vírgula em tudo que eu tô falando que loucura
 >
-> ```bash
-> /Applications/Handy.app/Contents/MacOS/Handy --toggle-transcription
-> ```
+> **Parakeet v3:** Inclua também um modelo com vírgulas, né? Porque, pelo amor de Deus, tá faltando vírgula em tudo que eu tô falando, que loucura!
 
-## Known Issues & Current Limitations
+**What I ruled out, and why:**
 
-This project is actively being developed and has some [known issues](https://github.com/cjpais/Handy/issues). We believe in transparency about the current state:
+- **An LLM post-processing pass** (Apple Intelligence, local and free) adds a second model and latency to every dictation. It also wasn't available here: the on-device model reported `modelNotReady`, and builds made with only the Command Line Tools compile Handy's Apple Intelligence bridge as a stub, because the `FoundationModels` macro plugin ships with full Xcode.
+- **LanguageTool as a correction step.** The macOS app has no local server, so it would mean sending dictation to the cloud, against Handy's local-first design. Its public API also only catches a couple of commas (before "mas", "aliás") on unpunctuated speech.
 
-### Bluetooth Headset Microphones (macOS)
+Choosing a model that punctuates natively beat every bolt-on: better output, ten times faster than Whisper, zero extra moving parts.
 
-Using a Bluetooth headset microphone on macOS may temporarily reduce playback quality or volume while recording because Bluetooth switches to bidirectional audio. Keep your headphones as the output device and select your Mac's built-in or an external microphone in Handy to avoid this.
+### 🔁 Exact word replacements
 
-### fn and Globe Key Shortcuts (macOS)
+**Why fuzzy wasn't enough.** Custom Words matches with Levenshtein distance plus a Soundex boost. "randy" vs "handy" is distance 1 in 5 letters (0.2), above the 0.07 threshold I run. And Soundex doesn't help, because the first letter differs (`R530` vs `H530`). Raising the threshold to the 0.18 default fixes Randy and breaks Portuguese instead: "mas" became "MAX", "hoje" became "hook".
 
-Shortcuts that include the `fn` (Globe) key **only work on Apple keyboards** — your Mac's built-in keyboard or an Apple external keyboard. They will never trigger on a third-party keyboard, even while it is connected to the same Mac.
+<p align="center"><img src="docs/fork/word-replacements.jpg" width="560" alt="Word Replacements setting with a Randy to Handy rule"></p>
 
-This is a hardware limitation rather than a Handy bug. `fn` is not part of the standard USB HID keyboard specification: Apple reports it through a vendor-specific usage that macOS honors only from Apple devices, while third-party keyboards handle their `Fn` key entirely in firmware and send nothing to the computer. There is no event for Handy to listen for.
+**How.** An exact, deterministic rule list: whole-word, case-insensitive, `from → to`. Replacement text is literal (`regex::NoExpand`, so `$` can't be read as a capture group), and an empty target deletes the term. It runs inside the transcription pipeline's fail-open transform: after custom words, before filler-word removal, so a bug in the rules can never cost you the transcript.
 
-If you switch between a MacBook keyboard and an external one, pick a shortcut built from standard modifiers (`ctrl`, `option`, `shift`, `command`) or a regular key instead.
+This is [cjpais/Handy#1533](https://github.com/cjpais/Handy/pull/1533) by **marko-kraemer**, merged onto current `main` here. Conflicts with the newer pipeline were resolved and the four locales added since were translated.
 
-### Linux Notes
+### 🛟 Paste recovery
 
-**Text Input Tools:**
+**The signal.** Upstream's _reliable paste_ already knows whether the target app actually read the transcript. On macOS it publishes the text as a lazy pasteboard promise (`declareTypes:owner:`), and the pasteboard calls back `pasteboard:provideDataForType:` only when someone reads it.
 
-For reliable text input on Linux, install the appropriate tool for your display server:
+```mermaid
+flowchart LR
+  A[Dictation done] --> B[Publish text as a lazy pasteboard promise]
+  B --> C[Send Cmd+V]
+  C --> D{Read within 2 s?}
+  D -- yes --> E[Restore the previous clipboard]
+  D -- no --> F[Overlay offers the text back]
+  F --> G[Clipboard changes only on Copy]
+```
 
-| Display Server | Recommended Tool | Install Command                                    |
-| -------------- | ---------------- | -------------------------------------------------- |
-| X11            | `xdotool`        | `sudo apt install xdotool`                         |
-| Wayland        | `wtype`          | `sudo apt install wtype`                           |
-| Both           | `dotool`         | `sudo apt install dotool` (requires `input` group) |
+**Decisions.**
 
-- **X11**: Install `xdotool` for both direct typing and clipboard paste shortcuts
-- **Ubuntu 26.04**: Has Wayland display server by default. `wtype` does not work, you need to install `ydotool` and configure systemd as described [here](https://github.com/cjpais/Handy/pull/557#issuecomment-3781249267).
-- **Wayland**: Install `wtype` (preferred) or `dotool` for text input to work correctly
-- **dotool setup**: Requires adding your user to the `input` group: `sudo usermod -aG input $USER` (then log out and back in)
+- **2 seconds.** Real reads land around 100 ms after the chord. Two seconds is generous enough for a loaded machine and quick enough that you're still looking at the screen.
+- **The clipboard is sacred.** The previous clipboard is restored on the usual schedule, and the card writes to it only when you click Copy. If you had an API key copied, it's still there.
+- **No focus stealing.** The overlay is a non-activating panel, so you keep typing where you were. That's also why there is no Esc to close it: it never has keyboard focus. It closes after 10 s, stays open while the pointer rests on it, and has a close button.
+- **Known limit, handled.** Some apps read the pasteboard on Cmd+V even with no text field focused, so the paste counts as delivered when it wasn't. Detection can't fix that, which is why there are two manual ways back below.
 
-Without these tools, Handy falls back to enigo which may have limited compatibility, especially on Wayland.
+### ⌥⇧H and the menu bar: the manual ways back
 
-**Wayland Support (Linux):**
+**⌥⇧H** opens the same card with your last five transcripts, newest first, each with its own Copy. When a paste just failed, that one goes first under "Não colou?" ("Didn't paste?").
 
-- Limited support for Wayland display server
-- Requires [`wtype`](https://github.com/atx/wtype) or [`dotool`](https://sr.ht/~geb/dotool/) for text input to work correctly (see [Linux Notes](#linux-notes) below for installation)
+**The menu bar** lists the last five transcripts right in Handy's tray menu as `HH:MM  first words…`; click one and the full text is copied.
 
-**Other Notes:**
+<table>
+  <tr>
+    <td align="center"><img src="docs/fork/recovery-card.jpg" width="410" alt="Recovery card with the last five transcripts and a Copy button on each"><br><sub>⌥⇧H: the last five, one Copy each</sub></td>
+    <td align="center"><img src="docs/fork/tray-recent.jpg" width="410" alt="Handy tray menu listing the last five transcripts"><br><sub>Menu bar: one click copies</sub></td>
+  </tr>
+</table>
 
-- **Runtime library dependency (`libgtk-layer-shell.so.0`)**:
-  - Handy links `gtk-layer-shell` on Linux. If startup fails with `error while loading shared libraries: libgtk-layer-shell.so.0`, install the runtime package for your distro:
+**Decisions.**
 
-    | Distro        | Package to install    | Example command                        |
-    | ------------- | --------------------- | -------------------------------------- |
-    | Ubuntu/Debian | `libgtk-layer-shell0` | `sudo apt install libgtk-layer-shell0` |
-    | Fedora/RHEL   | `gtk-layer-shell`     | `sudo dnf install gtk-layer-shell`     |
-    | Arch Linux    | `gtk-layer-shell`     | `sudo pacman -S gtk-layer-shell`       |
+- **Always visible, no submenu.** The first version hid the list behind a hover-only submenu; nobody found it. Now it sits under _Copy Last Transcript_.
+- **No disk reads on the main thread.** Upstream computes the tray snapshot off the main thread on purpose, so a busy worker can never freeze the menu bar. The recent transcripts join that snapshot, full text included, so a click copies exactly what the menu showed without touching SQLite. The menu refreshes when History adds, updates or deletes an entry.
+- **Labels that behave.** Whitespace collapsed to one line, cut at 48 characters with an ellipsis, and `&` escaped on Windows where menus read it as a mnemonic.
 
-  - For building from source on Ubuntu/Debian, you may also need `libgtk-layer-shell-dev`.
+## Install
 
-- The recording overlay is disabled by default on Linux (`Overlay Position: None`) because certain compositors treat it as the active window. When the overlay is visible it can steal focus, which prevents Handy from pasting back into the application that triggered transcription. If you enable the overlay anyway, be aware that clipboard-based pasting might fail or end up in the wrong window.
-- Handy disables the WebKit DMA-BUF renderer by default on Linux, but preserves explicit `WEBKIT_DISABLE_DMABUF_RENDERER` values. For rendering workarounds, see [Troubleshooting → Linux Startup Crashes or Instability](#linux-startup-crashes-or-instability).
-- If Handy fails to start reliably on Linux, see [Troubleshooting → Linux Startup Crashes or Instability](#linux-startup-crashes-or-instability).
-- **Global keyboard shortcuts (Wayland):** On Wayland, system-level shortcuts must be configured through your desktop environment or window manager. Use the [CLI flags](#cli-parameters) as the command for your custom shortcut.
+1. Download `Handy-macOS-arm64.zip` from [Releases](https://github.com/LimaJoota/Handy/releases/latest) (Apple Silicon).
+2. Unzip and move **Handy.app** to Applications.
+3. The build isn't notarized, so the first launch needs **System Settings → Privacy & Security → Open Anyway**.
+4. Grant Microphone and Accessibility when asked.
 
-  **GNOME:**
-  1. Open **Settings > Keyboard > Keyboard Shortcuts > Custom Shortcuts**
-  2. Click the **+** button to add a new shortcut
-  3. Set the **Name** to `Toggle Handy Transcription`
-  4. Set the **Command** to `handy --toggle-transcription`
-  5. Click **Set Shortcut** and press your desired key combination (e.g., `Super+O`)
+Update checks point to upstream Handy, which would bring back the stock build. Turn them off in Debug settings (`Cmd+Shift+D`) to stay on this one.
 
-  **KDE Plasma:**
-  1. Open **System Settings > Shortcuts > Custom Shortcuts**
-  2. Click **Edit > New > Global Shortcut > Command/URL**
-  3. Name it `Toggle Handy Transcription`
-  4. In the **Trigger** tab, set your desired key combination
-  5. In the **Action** tab, set the command to `handy --toggle-transcription`
-
-  **Sway / i3:**
-
-  Add to your config file (`~/.config/sway/config` or `~/.config/i3/config`):
-
-  ```ini
-  bindsym $mod+o exec handy --toggle-transcription
-  ```
-
-  **Hyprland:**
-
-  Add to your config file (`~/.config/hypr/hyprland.conf`):
-
-  ```ini
-  bind = $mainMod, O, exec, handy --toggle-transcription
-  ```
-
-- You can also trigger Handy externally via Unix signals or the CLI flags, which lets Wayland window managers or other hotkey daemons keep ownership of keybindings:
-
-  | Action                                    | Trigger                                                  |
-  | ----------------------------------------- | -------------------------------------------------------- |
-  | Toggle transcription                      | `pkill -USR2 -n handy` or `handy --toggle-transcription` |
-  | Toggle transcription with post-processing | `handy --toggle-post-process`                            |
-
-  Example Sway config:
-
-  ```ini
-  bindsym $mod+o exec pkill -USR2 -n handy
-  bindsym $mod+p exec handy --toggle-post-process
-  ```
-
-  `pkill` here simply delivers the signal—it does not terminate the process.
-
-  > **Behavior change:** older releases also accepted `SIGUSR1` for toggling transcription with post-processing. WebKitGTK — the webview engine embedded in Handy on Linux — uses SIGUSR1 internally to coordinate JavaScript garbage collection, so listening for it caused phantom recordings and interrupted dictations every few minutes ([#1660](https://github.com/cjpais/Handy/issues/1660)). Handy no longer listens for SIGUSR1 on Linux; the post-processing toggle is still available via `handy --toggle-post-process`. **Remove any `pkill -USR1` bindings**: the signal is now delivered straight to WebKit's internal handler and can crash the app.
-
-**Overlay & Pasting Issues (Linux):**
-
-- The recording overlay window can interfere with pasting transcribed text into target applications on Linux (X11)
-- **Solution:** Open **Settings > Advanced** and set **"Overlay Position"** to **"None"** to disable the overlay
-- Enable **"Audio Feedback"** (also in Advanced) if you still want audible confirmation of recording state
-- Users who upgrade from older versions or import settings from other platforms may need to manually apply this change
-
-## Verify Release Signatures
-
-Handy release artifacts are signed with Tauri's updater signature format. The public key is stored in [`src-tauri/tauri.conf.json`](src-tauri/tauri.conf.json) under `plugins.updater.pubkey`.
-
-To verify a release manually, set `ARTIFACT` to the filename you downloaded, save the `pubkey` value from `src-tauri/tauri.conf.json` to `handy.pub.b64`, then decode the public key and matching `.sig` file from base64 and verify the artifact with `minisign`:
+## Build from source
 
 ```bash
-# Replace with the file you downloaded
-ARTIFACT="Handy_0.8.1_amd64.AppImage"
-
-python3 - "$ARTIFACT" <<'PY'
-import base64, pathlib, sys
-
-artifact = sys.argv[1]
-
-pub = pathlib.Path("handy.pub.b64").read_text().strip()
-pathlib.Path("handy.pub").write_bytes(base64.b64decode(pub))
-
-sig = pathlib.Path(f"{artifact}.sig").read_text().strip()
-pathlib.Path(f"{artifact}.minisig").write_bytes(base64.b64decode(sig))
-PY
-
-minisign -Vm "$ARTIFACT" \
-  -p handy.pub \
-  -x "$ARTIFACT.minisig"
+git clone https://github.com/LimaJoota/Handy.git && cd Handy
+bun install
+mkdir -p src-tauri/resources/models
+curl -L -o src-tauri/resources/models/silero-vad-v6.2-F32.gguf \
+  https://huggingface.co/handy-computer/silero-vad-v6.2-gguf/resolve/main/silero-vad-v6.2-F32.gguf
+CMAKE_POLICY_VERSION_MINIMUM=3.5 bun run tauri build --bundles app
 ```
 
-On success, `minisign` prints:
+Full platform notes are in [BUILD.md](BUILD.md).
 
-```text
-Signature and comment signature verified
-```
+## Engineering
 
-Do not use `gpg` for these `.sig` files.
+- **Branches, one feature each**, all based on upstream `main`: [`feat/accent-color`](https://github.com/LimaJoota/Handy/tree/feat/accent-color), [`feat/word-replacements`](https://github.com/LimaJoota/Handy/tree/feat/word-replacements), [`feat/paste-recovery`](https://github.com/LimaJoota/Handy/tree/feat/paste-recovery) (includes the tray list), [`feat/tray-recent-transcripts`](https://github.com/LimaJoota/Handy/tree/feat/tray-recent-transcripts). [`pessoal`](https://github.com/LimaJoota/Handy/tree/pessoal) is all of them together and is what the release is built from.
+- **Tests:** 38 Rust unit tests cover these paths: accent validation, settings salvage, replacement rules, lost-paste detection, tray labels and the history queries.
+- **Clean gates:** `tsc`, ESLint, Prettier, `cargo fmt` and the translation checker all pass.
+- **i18n:** every new string ships in all 26 locales Handy supports.
+- **Follows upstream patterns**: settings as typed Rust enums with salvage-on-load, Tauri commands mirrored in `bindings.ts`, events for cross-webview sync. Easy to rebase, easy to upstream piece by piece.
 
-## Troubleshooting
+## Credits
 
-### Previous Clipboard Content Is Pasted Instead of the Transcription
-
-If the transcription is correct in **History** but Handy inserts text you copied earlier, see [issue #502](https://github.com/cjpais/Handy/issues/502). With the standard clipboard paste method, Handy restores your previous clipboard after a fixed delay. Under load, the receiving application may read the clipboard only after that restoration.
-
-1. Open Handy's settings window and press `Cmd+Shift+D` (macOS) or `Ctrl+Shift+D` (Windows/Linux) to reveal **Debug**.
-2. On **macOS and Windows**, try **Reliable Paste (Beta)** in Debug with a clipboard paste method selected. It uses clipboard read notifications to delay restoration instead of relying on the standard fixed delay. Test it in the application where the problem occurs; it is still experimental.
-3. If Reliable Paste is disabled or unavailable, increase **Paste Delay (After)** in Debug and test again. This controls the wait before restoring your previous clipboard. **Paste Delay (Before)** controls the wait before sending the paste keystroke and addresses a different part of the operation. These delay settings apply to the standard paste path, not Reliable Paste.
-
-If the problem persists, add your Handy version, operating system, receiving application, paste method, Reliable Paste setting, and before/after delays to the existing issue. Redact private dictated text before sharing logs.
-
-### Manual Model Installation (For Proxy Users or Network Restrictions)
-
-If you're behind a proxy, firewall, or in a restricted network environment where Handy cannot download models automatically, you can manually download and install them. The URLs are publicly accessible from any browser.
-
-#### Step 1: Find Your App Data Directory
-
-1. Open Handy settings
-2. Navigate to the **About** section
-3. Copy the "App Data Directory" path shown there, or use the shortcuts:
-   - **macOS**: `Cmd+Shift+D` to open debug menu
-   - **Windows/Linux**: `Ctrl+Shift+D` to open debug menu
-
-The typical paths are:
-
-- **macOS**: `~/Library/Application Support/com.pais.handy/`
-- **Windows**: `C:\Users\{username}\AppData\Roaming\com.pais.handy\`
-- **Linux**: `~/.config/com.pais.handy/`
-
-#### Step 2: Create Models Directory
-
-Inside your app data directory, create a `models` folder if it doesn't already exist:
-
-```bash
-# macOS/Linux
-mkdir -p ~/Library/Application\ Support/com.pais.handy/models
-
-# Windows (PowerShell)
-New-Item -ItemType Directory -Force -Path "$env:APPDATA\com.pais.handy\models"
-```
-
-#### Step 3: Download Model Files
-
-Download the models you want from below
-
-**Whisper Models (single .bin files):**
-
-- Small (487 MB): `https://blob.handy.computer/ggml-small.bin`
-- Medium (492 MB): `https://blob.handy.computer/whisper-medium-q4_1.bin`
-- Turbo (1600 MB): `https://blob.handy.computer/ggml-large-v3-turbo.bin`
-- Large (1100 MB): `https://blob.handy.computer/ggml-large-v3-q5_0.bin`
-
-**Parakeet Unified EN 0.6B (single `.gguf` file, recommended):**
-
-- Q8_0 (731 MB): `https://huggingface.co/handy-computer/parakeet-unified-en-0.6b-gguf/resolve/main/parakeet-unified-en-0.6b-Q8_0.gguf`
-
-#### Step 4: Install Models
-
-**For Whisper Models (.bin files):**
-
-Simply place the `.bin` file directly into the `models` directory:
-
-```
-{app_data_dir}/models/
-├── ggml-small.bin
-├── whisper-medium-q4_1.bin
-├── ggml-large-v3-turbo.bin
-└── ggml-large-v3-q5_0.bin
-```
-
-**For GGUF Models (.gguf files):**
-
-Place the `.gguf` file directly into the `models` directory, exactly like the Whisper `.bin` files above. Handy also picks up models already present in the shared Hugging Face cache (`~/.cache/huggingface/hub`), so a copy downloaded by another tool works without being moved.
-
-**Important Notes:**
-
-- Do not rename the `.bin` or `.gguf` files—use the exact filenames from the download URLs
-- After placing the files, restart Handy to detect the new models
-
-#### Step 5: Verify Installation
-
-1. Restart Handy
-2. Open Settings → Models
-3. Your manually installed models should now appear as "Downloaded"
-4. Select the model you want to use and test transcription
-
-### Custom Whisper Models
-
-Handy can auto-discover custom Whisper GGML models placed in the `models` directory. This is useful for users who want to use fine-tuned or community models not included in the default model list.
-
-**How to use:**
-
-1. Obtain a Whisper model in GGML `.bin` format (e.g., from [Hugging Face](https://huggingface.co/models?search=whisper%20ggml))
-2. Place the `.bin` file in your `models` directory (see paths above)
-3. Restart Handy to discover the new model
-4. The model will appear in the "Custom Models" section of the Models settings page
-
-**Important:**
-
-- Community models are user-provided and may not receive troubleshooting assistance
-- The model must be a valid Whisper GGML format (`.bin` file)
-- Model name is derived from the filename (e.g., `my-custom-model.bin` → "My Custom Model")
-
-### Linux Startup Crashes or Instability
-
-If Handy fails to start reliably on Linux — for example, it crashes shortly after launch, never shows its window, or reports a Wayland protocol error — try the steps below in order.
-
-**1. Install (or reinstall) `gtk-layer-shell`**
-
-Handy uses `gtk-layer-shell` for its recording overlay and links against it at runtime. A missing or broken installation is the most common cause of startup failures and can manifest as a crash or a hang well before any window is shown. Make sure the runtime package is installed for your distro:
-
-| Distro        | Package to install    | Example command                        |
-| ------------- | --------------------- | -------------------------------------- |
-| Ubuntu/Debian | `libgtk-layer-shell0` | `sudo apt install libgtk-layer-shell0` |
-| Fedora/RHEL   | `gtk-layer-shell`     | `sudo dnf install gtk-layer-shell`     |
-| Arch Linux    | `gtk-layer-shell`     | `sudo pacman -S gtk-layer-shell`       |
-
-If it is already installed and you still see startup problems, try reinstalling it (e.g. `sudo pacman -S gtk-layer-shell` again) in case the library files were corrupted by a partial upgrade.
-
-**2. Disable the GTK layer shell overlay (`HANDY_NO_GTK_LAYER_SHELL`)**
-
-If installing the library does not help, you can skip `gtk-layer-shell` initialization entirely as a workaround. On some compositors (notably KDE Plasma under Wayland) it has been reported to interact poorly with the recording overlay. With this variable set, the overlay falls back to a regular always-on-top window:
-
-```bash
-HANDY_NO_GTK_LAYER_SHELL=1 handy
-```
-
-**3. Configure WebKit DMA-BUF rendering (`WEBKIT_DISABLE_DMABUF_RENDERER`)**
-
-Handy disables the WebKitGTK DMA-BUF renderer by default on Linux because it can cause blank windows or crashes on some GPU/driver combinations. Explicit environment-variable values are preserved, including in the Nix package. To explicitly keep the renderer disabled:
-
-```bash
-WEBKIT_DISABLE_DMABUF_RENDERER=1 handy
-```
-
-Some users on WebKitGTK 2.54 report a flickering or partially drawn recording overlay with the renderer disabled ([#2166](https://github.com/cjpais/Handy/issues/2166)). If affected, try opting out of the default workaround:
-
-```bash
-WEBKIT_DISABLE_DMABUF_RENDERER=0 handy
-```
-
-This allows WebKit to use the renderer when supported, but can reintroduce the GPU/driver-specific crashes described above. Remove the override or use `=1` if that happens.
-
-Fully quit Handy, including its tray instance, before testing either value. Running a second instance with `--toggle-transcription` does not change the running process's environment.
-
-**Making a workaround permanent**
-
-Set the variable in the environment of the launcher that actually starts Handy. Shell profile exports may not apply to desktop-menu or autostart launches. If you launch Handy from a `.desktop` file, you can prefix the `Exec=` line, e.g.:
-
-```ini
-Exec=env HANDY_NO_GTK_LAYER_SHELL=1 handy
-```
-
-Handy's built-in autostart rewrites its generated desktop entry, so editing that entry is not a durable workaround. For autostart, use an appropriate session/service environment, or disable Handy's built-in autostart and manage your own startup entry with the required variable.
-
-If a workaround helps you, please [open an issue](https://github.com/cjpais/Handy/issues) describing your distro, desktop environment, and session type — that information helps us narrow down the underlying bug.
-
-### Empty recording overlay on Hyprland / Omarchy
-
-If the recording overlay is empty or bordered, fully quit Handy and launch a
-[native installation](BUILD.md#linux-install-from-source) with Wayland enabled:
-
-```bash
-env -u HANDY_NO_GTK_LAYER_SHELL GDK_BACKEND=wayland handy
-```
-
-If this works, apply `GDK_BACKEND=wayland` only to Handy's launcher. This
-workaround does not work with the 0.9.6 AppImage, which forces X11.
-
-### Vulkan Overlays and Capture Tools on Windows (`HANDY_KEEP_VULKAN_IMPLICIT_LAYERS`)
-
-On Windows, Handy asks the Vulkan loader to skip implicit layers to avoid crashes caused by overlay and capture hooks ([#2049](https://github.com/cjpais/Handy/issues/2049)). GPU acceleration remains enabled; this does not change system-wide settings.
-
-To opt out for GPU selection or debugging tools, fully quit Handy (including the tray icon), then run both commands in the same PowerShell window:
-
-```powershell
-$env:HANDY_KEEP_VULKAN_IMPLICIT_LAYERS = "1"
-& "$env:ProgramFiles\Handy\handy.exe"
-```
-
-Adjust the executable path if needed. This override only applies to apps launched from that PowerShell session, not the Start menu. Handy also preserves any existing `VK_LOADER_LAYERS_DISABLE` value.
-
-### How to Contribute
-
-1. **Check existing issues** at [github.com/cjpais/Handy/issues](https://github.com/cjpais/Handy/issues)
-2. **Fork the repository** and create a feature branch
-3. **Test thoroughly** on your target platform
-4. **Submit a pull request** with clear description of changes
-5. **Join the discussion** - reach out at [contact@handy.computer](mailto:contact@handy.computer)
-
-The goal is to create both a useful tool and a foundation for others to build upon—a well-patterned, simple codebase that serves the community.
-
-## Related Projects
-
-- **[Handy CLI](https://github.com/cjpais/handy-cli)** - The original Python command-line version
-- **[handy.computer](https://handy.computer)** - Project website with demos and documentation
-
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
-Handy is open-source software, but the Handy name, logo, icon, and brand assets are not open-source. Unofficial forks, rewrites, and redistributions must use their own branding and must not imply endorsement or affiliation.
-
-## Acknowledgments
-
-- **Whisper** by OpenAI for the speech recognition model
-- **ggml** for an amazing cross-platform tensor library
-- **Silero** for great lightweight VAD
-- **Tauri** team for the excellent Rust-based app framework
-- **Community contributors** helping make Handy better
+[Handy](https://github.com/cjpais/Handy) by CJ Pais and contributors, MIT licensed. Word replacements by marko-kraemer ([#1533](https://github.com/cjpais/Handy/pull/1533)). Everything else in this fork by [LimaJoota](https://github.com/LimaJoota).
