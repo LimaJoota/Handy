@@ -376,6 +376,8 @@ impl HistoryManager {
         {
             error!("Failed to emit history-updated event: {}", e);
         }
+        // The tray menu lists the recent transcripts.
+        crate::tray::update_tray_menu(&self.app_handle);
 
         Ok(entry)
     }
@@ -428,6 +430,8 @@ impl HistoryManager {
         {
             error!("Failed to emit history-updated event: {}", e);
         }
+        // The tray menu lists the recent transcripts.
+        crate::tray::update_tray_menu(&self.app_handle);
 
         Ok(entry)
     }
@@ -632,16 +636,34 @@ impl HistoryManager {
     }
 
     fn get_latest_completed_entry_with_conn(conn: &Connection) -> Result<Option<HistoryEntry>> {
+        Ok(Self::get_recent_completed_entries_with_conn(conn, 1)?
+            .into_iter()
+            .next())
+    }
+
+    /// The newest `limit` dictations with text, newest first, for the tray's
+    /// recent transcripts. Same filter as [`Self::get_latest_completed_entry`].
+    pub fn get_recent_completed_entries(&self, limit: usize) -> Result<Vec<HistoryEntry>> {
+        let conn = self.get_connection()?;
+        Self::get_recent_completed_entries_with_conn(&conn, limit)
+    }
+
+    fn get_recent_completed_entries_with_conn(
+        conn: &Connection,
+        limit: usize,
+    ) -> Result<Vec<HistoryEntry>> {
         let mut stmt = conn.prepare(&format!(
             "SELECT {ENTRY_COLUMNS}
              FROM transcription_history
              WHERE transcription_text != '' AND source_name IS NULL
              ORDER BY timestamp DESC
-             LIMIT 1"
+             LIMIT ?1"
         ))?;
 
-        let entry = stmt.query_row([], Self::map_history_entry).optional()?;
-        Ok(entry)
+        let entries = stmt
+            .query_map([limit as i64], Self::map_history_entry)?
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+        Ok(entries)
     }
 
     pub async fn toggle_saved_status(&self, id: i64) -> Result<()> {
@@ -715,6 +737,8 @@ impl HistoryManager {
         if let Err(e) = (HistoryUpdatePayload::Deleted { id }).emit(&self.app_handle) {
             error!("Failed to emit history-updated event: {}", e);
         }
+        // The tray menu lists the recent transcripts.
+        crate::tray::update_tray_menu(&self.app_handle);
 
         Ok(())
     }
