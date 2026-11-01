@@ -1,7 +1,7 @@
 use crate::audio_toolkit::chunking;
 use crate::audio_toolkit::{
-    apply_custom_words, detect_output_language, normalize_transcription_output,
-    remove_filler_words, OutputLanguageEvidence,
+    apply_custom_words, apply_word_replacements, detect_output_language,
+    normalize_transcription_output, remove_filler_words, OutputLanguageEvidence,
 };
 use crate::chinese_script::{convert_chinese_script, ChineseVariety};
 use crate::engine_supervisor::{
@@ -1650,8 +1650,13 @@ fn post_process_transcription_text(
             raw
         };
 
+        // Deterministic find-and-replace rules. Unlike fuzzy custom words,
+        // these run for every engine (including Whisper) since they are exact
+        // substitutions rather than model-prompt hints.
+        let replaced = apply_word_replacements(&corrected, &settings.word_replacements);
+
         let without_fillers = remove_filler_words(
-            &corrected,
+            &replaced,
             &output_language,
             &settings.custom_filler_words,
             settings.filler_word_removal_enabled,

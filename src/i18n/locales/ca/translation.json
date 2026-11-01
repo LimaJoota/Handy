@@ -584,6 +584,18 @@
         "remove": "Suprimiu {{word}}",
         "duplicate": "«{{word}}» ja existeix"
       },
+      "wordReplacements": {
+        "title": "Substitució de paraules",
+        "description": "Substitueix sempre una paraula o frase per una altra: exacte i sense distingir majúscules, sense aproximacions. Deixa la substitució en blanc per eliminar una paraula.",
+        "fromPlaceholder": "github",
+        "toPlaceholder": "GitHub",
+        "fromLabel": "Paraula a cercar",
+        "toLabel": "Substitueix per",
+        "add": "Afegeix",
+        "remove": "Elimina la substitució de {{from}} per {{to}}",
+        "emptyTarget": "(eliminada)",
+        "duplicate": "Ja existeix una substitució per a \"{{word}}\""
+      },
       "voiceActivityDetection": {
         "title": "Detecció d'activitat de veu",
         "description": "Filtra els silencis dels enregistraments. Els models compatibles amb la transcripció en temps real utilitzen un marge final de detecció de veu més llarg; si desactiveu la detecció, s'enregistra l'àudio sense filtrar."
