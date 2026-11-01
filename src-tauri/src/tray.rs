@@ -67,11 +67,11 @@ struct MenuInputs {
     downloaded_models: Vec<(String, String)>,
     locale: String,
     update_checks_enabled: bool,
-    /// Newest first, for the Recent Transcripts submenu.
+    /// Newest first, listed in the tray menu.
     recent_transcripts: Vec<RecentTranscript>,
 }
 
-/// One entry of the Recent Transcripts submenu. Holds the full text so a
+/// One recent transcript in the tray menu. Holds the full text so a
 /// click copies exactly what the menu was built from, with no DB read on the
 /// main thread.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -81,8 +81,8 @@ struct RecentTranscript {
     text: String,
 }
 
-/// How many transcripts the Recent Transcripts submenu lists.
-const RECENT_TRANSCRIPTS: usize = 10;
+/// How many transcripts the tray menu lists.
+const RECENT_TRANSCRIPTS: usize = 5;
 /// Menu labels are cut to this many characters; a click copies the full text.
 const RECENT_LABEL_CHARS: usize = 48;
 
@@ -561,24 +561,28 @@ fn build_menu(app: &AppHandle, inputs: &MenuInputs) -> tauri::Result<(Menu<tauri
         true,
         None::<&str>,
     )?;
-    // Hover to see the last few dictations, click one to copy it: the way
-    // back to text whose paste didn't land.
-    let recent_submenu = Submenu::with_id(
+    // The last few dictations, right in the menu: click one to copy it. The
+    // way back to text whose paste didn't land.
+    let recent_header = MenuItem::with_id(
         app,
         "recent_transcripts",
         &strings.recent_transcripts,
-        !inputs.recent_transcripts.is_empty(),
+        false,
+        None::<&str>,
     )?;
-    for recent in &inputs.recent_transcripts {
-        let item = MenuItem::with_id(
-            app,
-            format!("recent_transcript:{}", recent.id),
-            &recent.label,
-            true,
-            None::<&str>,
-        )?;
-        recent_submenu.append(&item)?;
-    }
+    let recent_items = inputs
+        .recent_transcripts
+        .iter()
+        .map(|recent| {
+            MenuItem::with_id(
+                app,
+                format!("recent_transcript:{}", recent.id),
+                &recent.label,
+                true,
+                None::<&str>,
+            )
+        })
+        .collect::<tauri::Result<Vec<_>>>()?;
     let quit_i = MenuItem::with_id(app, "quit", &strings.quit, true, quit_accelerator)?;
     let separator = || PredefinedMenuItem::separator(app);
 
@@ -592,7 +596,6 @@ fn build_menu(app: &AppHandle, inputs: &MenuInputs) -> tauri::Result<(Menu<tauri
                 &cancel_i,
                 &separator()?,
                 &copy_last_transcript_i,
-                &recent_submenu,
                 &separator()?,
                 &settings_i,
                 &check_updates_i,
@@ -632,7 +635,6 @@ fn build_menu(app: &AppHandle, inputs: &MenuInputs) -> tauri::Result<(Menu<tauri
                 &version_i,
                 &separator()?,
                 &copy_last_transcript_i,
-                &recent_submenu,
                 &separator()?,
                 &model_submenu,
                 &unload_model_i,
@@ -655,6 +657,24 @@ fn build_menu(app: &AppHandle, inputs: &MenuInputs) -> tauri::Result<(Menu<tauri
         menu.remove(&check_updates_i)?;
     }
 
+    // Under "Copy Last Transcript" in both layouts: a separator, the header,
+    // then the transcripts.
+    if !recent_items.is_empty() {
+        let copy_last_position = menu
+            .items()?
+            .iter()
+            .position(|item| item.id() == "copy_last_transcript")
+            .unwrap_or(0);
+        let mut position = copy_last_position + 1;
+        menu.insert(&separator()?, position)?;
+        position += 1;
+        menu.insert(&recent_header, position)?;
+        for item in &recent_items {
+            position += 1;
+            menu.insert(item, position)?;
+        }
+    }
+
     // Both layouts start with [version, separator, ...]; slot the warning in
     // right below the version line so it's the first actionable thing seen.
     let mut tooltip = version_label;
@@ -674,7 +694,7 @@ pub(crate) fn last_transcript_text(entry: &HistoryEntry) -> &str {
         .unwrap_or(&entry.transcription_text)
 }
 
-/// `HH:MM  first words…` on one line, for the Recent Transcripts submenu.
+/// `HH:MM  first words…` on one line, for the tray menu.
 fn recent_transcript_label(entry: &HistoryEntry) -> String {
     let text = last_transcript_text(entry)
         .split_whitespace()
@@ -694,7 +714,7 @@ fn recent_transcript_label(entry: &HistoryEntry) -> String {
     label
 }
 
-/// Copies a transcript picked from the Recent Transcripts submenu. The text
+/// Copies a transcript picked from the tray menu. The text
 /// comes from the menu as it was shown, so it is what the user clicked.
 pub fn copy_recent_transcript(app: &AppHandle, id: i64) {
     let Some(state) = app.try_state::<TrayState>() else {

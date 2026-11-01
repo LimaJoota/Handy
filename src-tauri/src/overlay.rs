@@ -1,5 +1,6 @@
 use crate::input;
 use crate::managers::audio::AudioRecordingManager;
+use crate::managers::history::HistoryManager;
 use crate::settings;
 use crate::settings::{OverlayPosition, OverlayStyle};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -56,28 +57,40 @@ const OVERLAY_HEIGHT: f64 = 50.0;
 const OVERLAY_STREAM_WIDTH: f64 = 400.0;
 const OVERLAY_STREAM_HEIGHT: f64 = 120.0;
 
-/// Overlay window size (logical) for a given UI state. The paste-recovery
-/// card reuses the Live panel's open size.
+/// Overlay window size (logical) for a given UI state.
 fn overlay_dimensions(state: &str) -> (f64, f64) {
-    if state == "streaming" || state == "recovery" {
-        (OVERLAY_STREAM_WIDTH, OVERLAY_STREAM_HEIGHT)
-    } else {
-        (OVERLAY_WIDTH, OVERLAY_HEIGHT)
+    match state {
+        "streaming" => (OVERLAY_STREAM_WIDTH, OVERLAY_STREAM_HEIGHT),
+        "recovery" => (OVERLAY_RECOVERY_WIDTH, OVERLAY_RECOVERY_HEIGHT),
+        _ => (OVERLAY_WIDTH, OVERLAY_HEIGHT),
     }
 }
 
-/// Transcript offered by the paste-recovery card until it is copied or
-/// dismissed. Held here, not in the webview, so Copy writes exactly this.
-static RECOVERY_TEXT: Mutex<Option<String>> = Mutex::new(None);
+// Recovery card: up to RECOVERY_LIST_LEN two-line rows over the base row.
+const OVERLAY_RECOVERY_WIDTH: f64 = 400.0;
+const OVERLAY_RECOVERY_HEIGHT: f64 = 320.0;
 
-/// Shows `text` in the overlay with a Copy button, for when a paste may not
-/// have landed. The clipboard is only written if the user clicks Copy, so
+/// How many transcripts the recovery card lists.
+const RECOVERY_LIST_LEN: usize = 5;
+
+/// Transcripts on the recovery card, newest first, until one is copied or the
+/// card is dismissed. Held here, not in the webview, so Copy writes exactly
+/// what was listed.
+static RECOVERY_TEXTS: Mutex<Vec<String>> = Mutex::new(Vec::new());
+
+#[derive(Clone, serde::Serialize)]
+struct RecoveryPayload {
+    texts: Vec<String>,
+    /// The first text is a paste that didn't land (vs. opened on demand).
+    lost: bool,
+}
+
+/// Shows the last few transcripts in the overlay, each with a Copy button.
+/// `lost` is a paste that may not have landed and goes first; the rest come
+/// from History. The clipboard is only written if the user clicks Copy, so
 /// whatever they had copied (a key, say) is left alone. Skipped while a new
-/// recording owns the overlay; the text is in History either way.
-pub fn show_paste_recovery(app_handle: &AppHandle, text: &str) {
-    if text.trim().is_empty() {
-        return;
-    }
+/// recording owns the overlay; everything is in History either way.
+pub fn show_paste_recovery(app_handle: &AppHandle, lost: Option<&str>) {
     if app_handle
         .state::<Arc<AudioRecordingManager>>()
         .is_recording()
@@ -85,24 +98,57 @@ pub fn show_paste_recovery(app_handle: &AppHandle, text: &str) {
         log::debug!("Skipping paste recovery: a recording owns the overlay");
         return;
     }
-    if let Ok(mut slot) = RECOVERY_TEXT.lock() {
-        *slot = Some(text.to_string());
+
+    let mut texts: Vec<String> = lost
+        .filter(|text| !text.trim().is_empty())
+        .map(str::to_string)
+        .into_iter()
+        .collect();
+    match app_handle
+        .state::<Arc<HistoryManager>>()
+        .get_recent_completed_entries(RECOVERY_LIST_LEN)
+    {
+        Ok(entries) => {
+            for entry in &entries {
+                let text = crate::tray::last_transcript_text(entry);
+                if texts.len() < RECOVERY_LIST_LEN && !texts.iter().any(|t| t == text) {
+                    texts.push(text.to_string());
+                }
+            }
+        }
+        Err(e) => log::error!("Failed to load recent transcripts for recovery: {e}"),
+    }
+    if texts.is_empty() {
+        return;
+    }
+
+    if let Ok(mut slot) = RECOVERY_TEXTS.lock() {
+        *slot = texts.clone();
     }
     if let Some(overlay_window) = app_handle.get_webview_window("recording_overlay") {
         // Sent before the state so the card never renders empty.
-        let _ = overlay_window.emit("paste-recovery-text", text);
+        let payload = RecoveryPayload {
+            texts,
+            lost: lost.is_some(),
+        };
+        let _ = overlay_window.emit("paste-recovery-texts", payload);
     }
     show_overlay_state(app_handle, "recovery");
 }
 
-/// Copies the recovery transcript (the user clicked Copy) and closes the card.
+/// Copies the recovery card's `index`th transcript (the user clicked its Copy)
+/// and closes the card.
 #[tauri::command]
 #[specta::specta]
-pub fn copy_paste_recovery_text(app: AppHandle) -> Result<(), String> {
-    let text = RECOVERY_TEXT
+pub fn copy_paste_recovery_text(app: AppHandle, index: u32) -> Result<(), String> {
+    let text = RECOVERY_TEXTS
         .lock()
         .ok()
-        .and_then(|mut slot| slot.take())
+        .and_then(|mut texts| {
+            let text = texts.get(index as usize).cloned();
+            texts.clear();
+            text
+        })
         .ok_or("No transcript to recover")?;
     app.clipboard()
         .write_text(text)
@@ -115,8 +161,8 @@ pub fn copy_paste_recovery_text(app: AppHandle) -> Result<(), String> {
 #[tauri::command]
 #[specta::specta]
 pub fn dismiss_paste_recovery(app: AppHandle) {
-    if let Ok(mut slot) = RECOVERY_TEXT.lock() {
-        *slot = None;
+    if let Ok(mut texts) = RECOVERY_TEXTS.lock() {
+        texts.clear();
     }
     // A recording that started meanwhile owns the overlay now.
     if !app.state::<Arc<AudioRecordingManager>>().is_recording() {
