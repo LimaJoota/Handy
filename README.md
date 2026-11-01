@@ -1,5 +1,14 @@
 # Handy
 
+> **LimaJoota fork.** Upstream Handy plus:
+>
+> - **Accent color:** Pink, System, Purple or Custom (About → Accent Color)
+> - **Word replacements:** exact find and replace, from cjpais/Handy#1533
+> - **Paste recovery:** if the target app doesn't read the paste, the overlay offers the text back. Option+Shift+H lists the last 5
+> - **Recent transcripts in the tray menu:** click one to copy it
+>
+> The clipboard only changes when you click Copy. macOS build in [Releases](https://github.com/LimaJoota/Handy/releases) (Apple Silicon, not notarized: the first launch needs System Settings → Privacy & Security → Open Anyway). Upstream: [cjpais/Handy](https://github.com/cjpais/Handy).
+
 [![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/WVBeWsNXK4)
 
 **A free, open source, and extensible speech-to-text application that works completely offline.**
