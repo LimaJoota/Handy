@@ -301,6 +301,11 @@ fn initialize_core_logic(app_handle: &AppHandle) {
             "copy_last_transcript" => {
                 tray::copy_last_transcript(app);
             }
+            id if id.starts_with("recent_transcript:") => {
+                if let Ok(id) = id["recent_transcript:".len()..].parse() {
+                    tray::copy_recent_transcript(app, id);
+                }
+            }
             "unload_model" => {
                 let transcription_manager = app.state::<Arc<TranscriptionManager>>();
                 if !transcription_manager.is_model_loaded() {

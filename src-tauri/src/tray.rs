@@ -25,6 +25,7 @@ use crate::managers::model::ModelManager;
 use crate::managers::transcription::TranscriptionManager;
 use crate::settings;
 use crate::tray_i18n::get_tray_translations;
+use chrono::{Local, TimeZone};
 use log::{debug, error, info, trace, warn};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -66,7 +67,24 @@ struct MenuInputs {
     downloaded_models: Vec<(String, String)>,
     locale: String,
     update_checks_enabled: bool,
+    /// Newest first, for the Recent Transcripts submenu.
+    recent_transcripts: Vec<RecentTranscript>,
 }
+
+/// One entry of the Recent Transcripts submenu. Holds the full text so a
+/// click copies exactly what the menu was built from, with no DB read on the
+/// main thread.
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct RecentTranscript {
+    id: i64,
+    label: String,
+    text: String,
+}
+
+/// How many transcripts the Recent Transcripts submenu lists.
+const RECENT_TRANSCRIPTS: usize = 10;
+/// Menu labels are cut to this many characters; a click copies the full text.
+const RECENT_LABEL_CHARS: usize = 48;
 
 /// Complete description of what the tray should look like.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -336,6 +354,26 @@ fn compute_desired(app: &AppHandle, icon_state: TrayIconState) -> TrayDesired {
         .collect();
     downloaded_models.sort_by(|a, b| a.1.cmp(&b.1));
 
+    let recent_transcripts = app
+        .try_state::<Arc<HistoryManager>>()
+        .map(
+            |hm| match hm.get_recent_completed_entries(RECENT_TRANSCRIPTS) {
+                Ok(entries) => entries
+                    .iter()
+                    .map(|entry| RecentTranscript {
+                        id: entry.id,
+                        label: recent_transcript_label(entry),
+                        text: last_transcript_text(entry).to_string(),
+                    })
+                    .collect(),
+                Err(err) => {
+                    error!("Failed to load recent transcripts for the tray: {err}");
+                    Vec::new()
+                }
+            },
+        )
+        .unwrap_or_default();
+
     TrayDesired {
         icon_path: get_icon_path(theme, icon_state, warning),
         menu: MenuInputs {
@@ -347,6 +385,7 @@ fn compute_desired(app: &AppHandle, icon_state: TrayIconState) -> TrayDesired {
             downloaded_models,
             locale: settings.app_language,
             update_checks_enabled: settings.update_checks_enabled,
+            recent_transcripts,
         },
     }
 }
@@ -522,6 +561,24 @@ fn build_menu(app: &AppHandle, inputs: &MenuInputs) -> tauri::Result<(Menu<tauri
         true,
         None::<&str>,
     )?;
+    // Hover to see the last few dictations, click one to copy it: the way
+    // back to text whose paste didn't land.
+    let recent_submenu = Submenu::with_id(
+        app,
+        "recent_transcripts",
+        &strings.recent_transcripts,
+        !inputs.recent_transcripts.is_empty(),
+    )?;
+    for recent in &inputs.recent_transcripts {
+        let item = MenuItem::with_id(
+            app,
+            format!("recent_transcript:{}", recent.id),
+            &recent.label,
+            true,
+            None::<&str>,
+        )?;
+        recent_submenu.append(&item)?;
+    }
     let quit_i = MenuItem::with_id(app, "quit", &strings.quit, true, quit_accelerator)?;
     let separator = || PredefinedMenuItem::separator(app);
 
@@ -535,6 +592,7 @@ fn build_menu(app: &AppHandle, inputs: &MenuInputs) -> tauri::Result<(Menu<tauri
                 &cancel_i,
                 &separator()?,
                 &copy_last_transcript_i,
+                &recent_submenu,
                 &separator()?,
                 &settings_i,
                 &check_updates_i,
@@ -574,6 +632,7 @@ fn build_menu(app: &AppHandle, inputs: &MenuInputs) -> tauri::Result<(Menu<tauri
                 &version_i,
                 &separator()?,
                 &copy_last_transcript_i,
+                &recent_submenu,
                 &separator()?,
                 &model_submenu,
                 &unload_model_i,
@@ -613,6 +672,49 @@ fn last_transcript_text(entry: &HistoryEntry) -> &str {
         .post_processed_text
         .as_deref()
         .unwrap_or(&entry.transcription_text)
+}
+
+/// `HH:MM  first words…` on one line, for the Recent Transcripts submenu.
+fn recent_transcript_label(entry: &HistoryEntry) -> String {
+    let text = last_transcript_text(entry)
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
+    let mut preview: String = text.chars().take(RECENT_LABEL_CHARS).collect();
+    if text.chars().count() > RECENT_LABEL_CHARS {
+        preview = format!("{}…", preview.trim_end());
+    }
+    let label = match Local.timestamp_opt(entry.timestamp, 0).single() {
+        Some(time) => format!("{}  {}", time.format("%H:%M"), preview),
+        None => preview,
+    };
+    // Windows menus read `&` as a mnemonic marker.
+    #[cfg(target_os = "windows")]
+    let label = label.replace('&', "&&");
+    label
+}
+
+/// Copies a transcript picked from the Recent Transcripts submenu. The text
+/// comes from the menu as it was shown, so it is what the user clicked.
+pub fn copy_recent_transcript(app: &AppHandle, id: i64) {
+    let Some(state) = app.try_state::<TrayState>() else {
+        return;
+    };
+    let text = state.lock().applied_menu.as_ref().and_then(|menu| {
+        menu.recent_transcripts
+            .iter()
+            .find(|recent| recent.id == id)
+            .map(|recent| recent.text.clone())
+    });
+    let Some(text) = text else {
+        warn!("Recent transcript {id} is no longer in the tray menu");
+        return;
+    };
+    if let Err(err) = app.clipboard().write_text(text) {
+        error!("Failed to copy recent transcript to clipboard: {}", err);
+        return;
+    }
+    info!("Copied recent transcript {id} to clipboard via tray.");
 }
 
 pub fn set_tray_visibility(app: &AppHandle, visible: bool) {
@@ -682,7 +784,10 @@ pub fn copy_last_transcript(app: &AppHandle) {
 
 #[cfg(test)]
 mod tests {
-    use super::{last_transcript_text, load_tray_icon, MenuInputs, TrayDesired, TrayIconState};
+    use super::{
+        last_transcript_text, load_tray_icon, recent_transcript_label, MenuInputs, TrayDesired,
+        TrayIconState, RECENT_LABEL_CHARS,
+    };
     use crate::managers::history::HistoryEntry;
 
     fn build_entry(transcription: &str, post_processed: Option<&str>) -> HistoryEntry {
@@ -712,7 +817,28 @@ mod tests {
             downloaded_models: vec![("small".to_string(), "Small".to_string())],
             locale: "en".to_string(),
             update_checks_enabled: true,
+            recent_transcripts: Vec::new(),
         }
+    }
+
+    #[test]
+    fn recent_label_is_one_line_and_cut_with_ellipsis() {
+        let mut entry = build_entry(
+            "Coloque o Handy no modo\nminimalista, porque essa palavra gigantesca atrapalha",
+            None,
+        );
+        entry.timestamp = i64::MIN; // no valid local time: label is the preview only
+        let label = recent_transcript_label(&entry);
+        assert!(!label.contains('\n'));
+        assert!(label.ends_with('…'));
+        assert!(label.chars().count() <= RECENT_LABEL_CHARS + 1);
+        assert!(label.starts_with("Coloque o Handy no modo minimalista"));
+    }
+
+    #[test]
+    fn recent_label_keeps_short_text_whole() {
+        let label = recent_transcript_label(&build_entry("Oi", None));
+        assert!(label.ends_with("  Oi"));
     }
 
     #[test]
