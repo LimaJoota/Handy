@@ -584,6 +584,18 @@
         "remove": "Fjern {{word}}",
         "duplicate": "\"{{word}}\" findes allerede"
       },
+      "wordReplacements": {
+        "title": "Ordudskiftning",
+        "description": "Erstat altid et ord eller en sætning med et andet – præcist og uden forskel på store og små bogstaver, ingen gætteri. Lad erstatningen være tom for at fjerne et ord.",
+        "fromPlaceholder": "github",
+        "toPlaceholder": "GitHub",
+        "fromLabel": "Ord at finde",
+        "toLabel": "Erstat med",
+        "add": "Tilføj",
+        "remove": "Fjern udskiftningen {{from}} til {{to}}",
+        "emptyTarget": "(fjernet)",
+        "duplicate": "Der findes allerede en udskiftning for \"{{word}}\""
+      },
       "voiceActivityDetection": {
         "title": "Stemmeaktivitetsdetektion",
         "description": "Filtrer stilhed fra optagelser. Streaming-modeller bruger en længere VAD-hale; deaktivering af VAD optager rå lyd."
