@@ -955,6 +955,17 @@
       "dark": "Dark"
     }
   },
+  "accent": {
+    "title": "Accent Color",
+    "description": "Color for highlights, buttons and the recording indicator",
+    "customLabel": "Custom accent color",
+    "options": {
+      "pink": "Pink",
+      "system": "System",
+      "purple": "Purple",
+      "custom": "Custom"
+    }
+  },
   "overlay": {
     "transcribing": "Transcribing...",
     "processing": "Processing...",

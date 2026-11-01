@@ -955,6 +955,17 @@
       "dark": "Escuro"
     }
   },
+  "accent": {
+    "title": "Cor de destaque",
+    "description": "Cor dos destaques, botões e do indicador de gravação",
+    "customLabel": "Cor de destaque personalizada",
+    "options": {
+      "pink": "Rosa",
+      "system": "Sistema",
+      "purple": "Roxo",
+      "custom": "Personalizada"
+    }
+  },
   "overlay": {
     "transcribing": "Transcrevendo...",
     "processing": "Processando...",

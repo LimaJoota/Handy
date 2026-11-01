@@ -955,6 +955,17 @@
       "dark": "Scuro"
     }
   },
+  "accent": {
+    "title": "Colore di accento",
+    "description": "Colore di evidenziazioni, pulsanti e indicatore di registrazione",
+    "customLabel": "Colore di accento personalizzato",
+    "options": {
+      "pink": "Rosa",
+      "system": "Sistema",
+      "purple": "Viola",
+      "custom": "Personalizzato"
+    }
+  },
   "overlay": {
     "transcribing": "Trascrizione...",
     "processing": "Elaborazione...",

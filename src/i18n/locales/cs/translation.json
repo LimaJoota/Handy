@@ -955,6 +955,17 @@
       "dark": "Tmavý"
     }
   },
+  "accent": {
+    "title": "Barva zvýraznění",
+    "description": "Barva zvýraznění, tlačítek a indikátoru nahrávání",
+    "customLabel": "Vlastní barva zvýraznění",
+    "options": {
+      "pink": "Růžová",
+      "system": "Systémová",
+      "purple": "Fialová",
+      "custom": "Vlastní"
+    }
+  },
   "overlay": {
     "transcribing": "Přepisuji...",
     "processing": "Zpracovávám...",

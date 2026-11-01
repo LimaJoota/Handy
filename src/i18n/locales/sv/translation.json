@@ -955,6 +955,17 @@
       "dark": "Mörkt"
     }
   },
+  "accent": {
+    "title": "Accentfärg",
+    "description": "Färg för markeringar, knappar och inspelningsindikatorn",
+    "customLabel": "Anpassad accentfärg",
+    "options": {
+      "pink": "Rosa",
+      "system": "System",
+      "purple": "Lila",
+      "custom": "Anpassad"
+    }
+  },
   "overlay": {
     "transcribing": "Transkriberar...",
     "processing": "Bearbetar...",

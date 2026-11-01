@@ -955,6 +955,17 @@
       "dark": "Dunkel"
     }
   },
+  "accent": {
+    "title": "Akzentfarbe",
+    "description": "Farbe für Hervorhebungen, Schaltflächen und die Aufnahmeanzeige",
+    "customLabel": "Eigene Akzentfarbe",
+    "options": {
+      "pink": "Rosa",
+      "system": "System",
+      "purple": "Lila",
+      "custom": "Eigene"
+    }
+  },
   "overlay": {
     "transcribing": "Transkribiere...",
     "processing": "Verarbeite...",

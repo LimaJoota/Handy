@@ -955,6 +955,17 @@
       "dark": "Fosc"
     }
   },
+  "accent": {
+    "title": "Color d'èmfasi",
+    "description": "Color dels ressaltats, els botons i l'indicador de gravació",
+    "customLabel": "Color d'èmfasi personalitzat",
+    "options": {
+      "pink": "Rosa",
+      "system": "Sistema",
+      "purple": "Lila",
+      "custom": "Personalitzat"
+    }
+  },
   "overlay": {
     "transcribing": "S'està transcrivint...",
     "processing": "S'està processant...",

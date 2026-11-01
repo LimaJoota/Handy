@@ -955,6 +955,17 @@
       "dark": "داكن"
     }
   },
+  "accent": {
+    "title": "لون التمييز",
+    "description": "لون الإبرازات والأزرار ومؤشر التسجيل",
+    "customLabel": "لون تمييز مخصص",
+    "options": {
+      "pink": "وردي",
+      "system": "النظام",
+      "purple": "بنفسجي",
+      "custom": "مخصص"
+    }
+  },
   "overlay": {
     "transcribing": "جاري التفريغ...",
     "processing": "جاري المعالجة...",

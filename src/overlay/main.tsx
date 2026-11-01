@@ -7,6 +7,11 @@ import {
   getStoredTheme,
   syncThemeFromSettings,
 } from "@/lib/utils/theme";
+import {
+  applyAccent,
+  getStoredAccent,
+  syncAccentFromSettings,
+} from "@/lib/utils/accent";
 import type { Theme } from "@/bindings";
 import "@/i18n";
 
@@ -17,6 +22,10 @@ import "@/i18n";
 applyTheme(getStoredTheme());
 syncThemeFromSettings();
 listen<Theme>("theme-changed", (event) => applyTheme(event.payload));
+// Same for the accent; the event carries no payload, so re-read it.
+applyAccent(...getStoredAccent());
+syncAccentFromSettings();
+listen("accent-changed", () => syncAccentFromSettings());
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

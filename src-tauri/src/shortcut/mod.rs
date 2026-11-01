@@ -22,9 +22,9 @@ use tauri::{AppHandle, Emitter, Manager};
 #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
 use crate::settings::APPLE_INTELLIGENCE_DEFAULT_MODEL_ID;
 use crate::settings::{
-    self, get_settings, AutoSubmitKey, ChineseScript, ClipboardHandling, KeyboardImplementation,
-    LLMPrompt, LanguageDetectionMode, OverlayPosition, OverlayStyle, PasteMethod,
-    ShortcutActivation, ShortcutBinding, SoundTheme, Theme, TypingTool, VadBackend,
+    self, get_settings, AccentColor, AutoSubmitKey, ChineseScript, ClipboardHandling,
+    KeyboardImplementation, LLMPrompt, LanguageDetectionMode, OverlayPosition, OverlayStyle,
+    PasteMethod, ShortcutActivation, ShortcutBinding, SoundTheme, Theme, TypingTool, VadBackend,
     APPLE_INTELLIGENCE_PROVIDER_ID,
 };
 use crate::tray;
@@ -653,6 +653,48 @@ pub fn change_theme_setting(app: AppHandle, theme: String) -> Result<(), String>
     // live — they set `data-theme` on their own document and can't see this one.
     let _ = app.emit("theme-changed", parsed);
     Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_accent_color_setting(app: AppHandle, accent: String) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    let parsed = match accent.as_str() {
+        "pink" => AccentColor::Pink,
+        "system" => AccentColor::System,
+        "purple" => AccentColor::Purple,
+        "custom" => AccentColor::Custom,
+        other => {
+            warn!("Invalid accent color '{}', defaulting to pink", other);
+            AccentColor::Pink
+        }
+    };
+    settings.accent_color = parsed;
+    settings::write_settings(&app, settings);
+    // Like `theme-changed`: the overlay re-reads the accent for its own document.
+    let _ = app.emit("accent-changed", ());
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_accent_custom_color_setting(app: AppHandle, color: String) -> Result<(), String> {
+    if !is_hex_color(&color) {
+        return Err(format!(
+            "Invalid accent color '{}', expected #rrggbb",
+            color
+        ));
+    }
+    let mut settings = settings::get_settings(&app);
+    settings.accent_custom_color = color.to_ascii_lowercase();
+    settings::write_settings(&app, settings);
+    let _ = app.emit("accent-changed", ());
+    Ok(())
+}
+
+/// `#rrggbb`, the only form `<input type="color">` produces.
+fn is_hex_color(value: &str) -> bool {
+    value.len() == 7 && value.starts_with('#') && value[1..].chars().all(|c| c.is_ascii_hexdigit())
 }
 
 /// Applies the appearance setting to the native window chrome (title bar), which
@@ -1531,8 +1573,18 @@ pub async fn get_available_accelerators(
 
 #[cfg(test)]
 mod tests {
+    use super::is_hex_color;
     use handy_keys::Hotkey;
     use tauri_plugin_global_shortcut::Shortcut;
+
+    #[test]
+    fn accent_custom_color_accepts_only_rrggbb() {
+        assert!(is_hex_color("#8b5cf6"));
+        assert!(is_hex_color("#8B5CF6"));
+        for bad in ["8b5cf6", "#fff", "#8b5cf6ff", "#8b5cfg", "", "red"] {
+            assert!(!is_hex_color(bad), "accepted {bad}");
+        }
+    }
 
     #[test]
     fn compound_shortcut_keys_parse_on_both_backends() {

@@ -955,6 +955,17 @@
       "dark": "כהה"
     }
   },
+  "accent": {
+    "title": "צבע הדגשה",
+    "description": "הצבע של הדגשות, כפתורים ומחוון ההקלטה",
+    "customLabel": "צבע הדגשה מותאם אישית",
+    "options": {
+      "pink": "ורוד",
+      "system": "מערכת",
+      "purple": "סגול",
+      "custom": "מותאם אישית"
+    }
+  },
   "overlay": {
     "transcribing": "מתמלל...",
     "processing": "מעבד...",

@@ -955,6 +955,17 @@
       "dark": "Tối"
     }
   },
+  "accent": {
+    "title": "Màu nhấn",
+    "description": "Màu cho phần đánh dấu, nút và chỉ báo ghi âm",
+    "customLabel": "Màu nhấn tùy chỉnh",
+    "options": {
+      "pink": "Hồng",
+      "system": "Hệ thống",
+      "purple": "Tím",
+      "custom": "Tùy chỉnh"
+    }
+  },
   "overlay": {
     "transcribing": "Đang chuyển đổi...",
     "processing": "Đang xử lý...",

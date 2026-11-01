@@ -955,6 +955,17 @@
       "dark": "어둡게"
     }
   },
+  "accent": {
+    "title": "강조 색상",
+    "description": "강조 표시, 버튼 및 녹음 표시기의 색상",
+    "customLabel": "사용자 지정 강조 색상",
+    "options": {
+      "pink": "분홍",
+      "system": "시스템",
+      "purple": "보라",
+      "custom": "사용자 지정"
+    }
+  },
   "overlay": {
     "transcribing": "텍스트로 변환 중...",
     "processing": "처리 중...",

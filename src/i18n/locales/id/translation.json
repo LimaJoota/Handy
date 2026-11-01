@@ -955,6 +955,17 @@
       "dark": "Gelap"
     }
   },
+  "accent": {
+    "title": "Warna aksen",
+    "description": "Warna sorotan, tombol, dan indikator perekaman",
+    "customLabel": "Warna aksen kustom",
+    "options": {
+      "pink": "Merah muda",
+      "system": "Sistem",
+      "purple": "Ungu",
+      "custom": "Kustom"
+    }
+  },
   "overlay": {
     "transcribing": "Mentranskripsikan...",
     "processing": "Memproses...",

@@ -955,6 +955,17 @@
       "dark": "深色"
     }
   },
+  "accent": {
+    "title": "強調色",
+    "description": "醒目提示、按鈕與錄音指示器的顏色",
+    "customLabel": "自訂強調色",
+    "options": {
+      "pink": "粉紅色",
+      "system": "跟隨系統",
+      "purple": "紫色",
+      "custom": "自訂"
+    }
+  },
   "overlay": {
     "transcribing": "正在轉錄...",
     "processing": "處理中...",

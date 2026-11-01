@@ -955,6 +955,17 @@
       "dark": "ダーク"
     }
   },
+  "accent": {
+    "title": "アクセントカラー",
+    "description": "ハイライト、ボタン、録音インジケーターの色",
+    "customLabel": "カスタムアクセントカラー",
+    "options": {
+      "pink": "ピンク",
+      "system": "システム",
+      "purple": "パープル",
+      "custom": "カスタム"
+    }
+  },
   "overlay": {
     "transcribing": "文字起こし中…",
     "processing": "処理中…",

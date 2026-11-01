@@ -242,3 +242,34 @@
   --color-warning-wash: var(--dark-color-warning-wash);
   --color-error-wash: var(--dark-color-error-wash);
 }
+
+/*
+ * Accent override, driven by the `accent_color` setting via
+ * `document.documentElement.dataset.accent` (see `src/lib/utils/accent.ts`).
+ * Pink (no attribute) is the brand palette above. The others replace its three
+ * sources; everything mixed from them (washes, wordmark, demo) follows, in
+ * both themes and in the recording overlay.
+ */
+:root[data-accent="purple"] {
+  --light-color-logo-primary: #c4b5fd;
+  --dark-color-logo-primary: #a78bfa;
+  --color-background-ui: #8b5cf6;
+}
+
+/* System and Custom derive the pair from one base color: the strong shade
+   stays as is for buttons and switches, the pastel ones are tinted toward
+   white like the pink pair. */
+:root[data-accent="system"] {
+  --accent-base: AccentColor;
+}
+
+:root[data-accent="custom"] {
+  --accent-base: var(--accent-custom);
+}
+
+:root[data-accent="system"],
+:root[data-accent="custom"] {
+  --light-color-logo-primary: color-mix(in srgb, var(--accent-base) 50%, #fff);
+  --dark-color-logo-primary: color-mix(in srgb, var(--accent-base) 70%, #fff);
+  --color-background-ui: var(--accent-base);
+}

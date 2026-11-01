@@ -955,6 +955,17 @@
       "dark": "Koyu"
     }
   },
+  "accent": {
+    "title": "Vurgu rengi",
+    "description": "Vurgular, düğmeler ve kayıt göstergesi için renk",
+    "customLabel": "Özel vurgu rengi",
+    "options": {
+      "pink": "Pembe",
+      "system": "Sistem",
+      "purple": "Mor",
+      "custom": "Özel"
+    }
+  },
   "overlay": {
     "transcribing": "Transkribe ediliyor...",
     "processing": "İşleniyor...",

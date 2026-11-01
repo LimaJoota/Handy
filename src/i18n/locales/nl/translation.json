@@ -955,6 +955,17 @@
       "dark": "Donker"
     }
   },
+  "accent": {
+    "title": "Accentkleur",
+    "description": "Kleur voor markeringen, knoppen en de opname-indicator",
+    "customLabel": "Aangepaste accentkleur",
+    "options": {
+      "pink": "Roze",
+      "system": "Systeem",
+      "purple": "Paars",
+      "custom": "Aangepast"
+    }
+  },
   "overlay": {
     "transcribing": "Transcriberen...",
     "processing": "Verwerken...",

@@ -955,6 +955,17 @@
       "dark": "Oscuro"
     }
   },
+  "accent": {
+    "title": "Color de acento",
+    "description": "Color de los resaltados, botones y el indicador de grabación",
+    "customLabel": "Color de acento personalizado",
+    "options": {
+      "pink": "Rosa",
+      "system": "Sistema",
+      "purple": "Morado",
+      "custom": "Personalizado"
+    }
+  },
   "overlay": {
     "transcribing": "Transcribiendo...",
     "processing": "Procesando...",

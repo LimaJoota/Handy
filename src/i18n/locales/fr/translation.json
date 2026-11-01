@@ -955,6 +955,17 @@
       "dark": "Sombre"
     }
   },
+  "accent": {
+    "title": "Couleur d'accentuation",
+    "description": "Couleur des surlignages, des boutons et de l'indicateur d'enregistrement",
+    "customLabel": "Couleur d'accentuation personnalisée",
+    "options": {
+      "pink": "Rose",
+      "system": "Système",
+      "purple": "Violet",
+      "custom": "Personnalisée"
+    }
+  },
   "overlay": {
     "transcribing": "Transcription...",
     "processing": "Traitement...",

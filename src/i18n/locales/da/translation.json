@@ -955,6 +955,17 @@
       "dark": "Mørk"
     }
   },
+  "accent": {
+    "title": "Accentfarve",
+    "description": "Farve til fremhævninger, knapper og optageindikatoren",
+    "customLabel": "Brugerdefineret accentfarve",
+    "options": {
+      "pink": "Lyserød",
+      "system": "System",
+      "purple": "Lilla",
+      "custom": "Brugerdefineret"
+    }
+  },
   "overlay": {
     "transcribing": "Transskriberer...",
     "processing": "Behandler...",

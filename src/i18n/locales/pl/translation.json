@@ -955,6 +955,17 @@
       "dark": "Ciemny"
     }
   },
+  "accent": {
+    "title": "Kolor akcentu",
+    "description": "Kolor wyróżnień, przycisków i wskaźnika nagrywania",
+    "customLabel": "Własny kolor akcentu",
+    "options": {
+      "pink": "Różowy",
+      "system": "Systemowy",
+      "purple": "Fioletowy",
+      "custom": "Własny"
+    }
+  },
   "overlay": {
     "transcribing": "Transkrypcja...",
     "processing": "Przetwarzanie...",

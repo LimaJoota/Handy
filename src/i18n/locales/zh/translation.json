@@ -955,6 +955,17 @@
       "dark": "深色"
     }
   },
+  "accent": {
+    "title": "强调色",
+    "description": "高亮、按钮和录音指示器的颜色",
+    "customLabel": "自定义强调色",
+    "options": {
+      "pink": "粉色",
+      "system": "跟随系统",
+      "purple": "紫色",
+      "custom": "自定义"
+    }
+  },
   "overlay": {
     "transcribing": "正在转录...",
     "processing": "处理中...",
