@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "קיצור לעיבוד משלים",
             "description": "אופציונלי: קיצור מקשים ייעודי שתמיד מפעיל עיבוד AI על התמלול."
+          },
+          "show_last_transcript": {
+            "name": "הצג את התמלול האחרון",
+            "description": "מציג את התמלול האחרון עם כפתור העתקה, בלי לגעת בלוח עד שתלחץ."
           }
         },
         "errors": {
@@ -981,7 +985,12 @@
   "overlay": {
     "transcribing": "מתמלל...",
     "processing": "מעבד...",
-    "loadingModel": "טוען מודל..."
+    "loadingModel": "טוען מודל...",
+    "recovery": {
+      "title": "לא הודבק?",
+      "copy": "העתק",
+      "close": "סגור"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "ייתכן ש-{{name}} חוסם קיצור דרך אחד",

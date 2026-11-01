@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "مفتاح المعالجة اللاحقة",
             "description": "اختياري: مفتاح اختصار مخصص يطبق دائماً المعالجة اللاحقة بالذكاء الاصطناعي على التفريغ الصوتي."
+          },
+          "show_last_transcript": {
+            "name": "عرض آخر نص مُفرّغ",
+            "description": "يعرض آخر نص مُفرّغ مع زر نسخ، دون لمس الحافظة حتى تنقر عليه."
           }
         },
         "errors": {
@@ -981,7 +985,12 @@
   "overlay": {
     "transcribing": "جاري التفريغ...",
     "processing": "جاري المعالجة...",
-    "loadingModel": "جارٍ تحميل النموذج..."
+    "loadingModel": "جارٍ تحميل النموذج...",
+    "recovery": {
+      "title": "لم يُلصق؟",
+      "copy": "نسخ",
+      "close": "إغلاق"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "قد يحظر {{name}} اختصارًا واحدًا",

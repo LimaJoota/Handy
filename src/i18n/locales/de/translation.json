@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "Nachbearbeitungs-Tastenkürzel",
             "description": "Optional: Ein dediziertes Tastenkürzel, das immer die KI-Nachbearbeitung auf deine Transkription anwendet."
+          },
+          "show_last_transcript": {
+            "name": "Letzte Transkription anzeigen",
+            "description": "Zeigt deine letzte Transkription mit einer Kopieren-Schaltfläche an, ohne die Zwischenablage anzurühren, bis du klickst."
           }
         },
         "errors": {
@@ -981,7 +985,12 @@
   "overlay": {
     "transcribing": "Transkribiere...",
     "processing": "Verarbeite...",
-    "loadingModel": "Modell wird geladen..."
+    "loadingModel": "Modell wird geladen...",
+    "recovery": {
+      "title": "Nicht eingefügt?",
+      "copy": "Kopieren",
+      "close": "Schließen"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} blockiert möglicherweise 1 Tastenkürzel",

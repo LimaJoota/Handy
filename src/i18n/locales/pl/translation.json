@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "Skrót postprocessingu",
             "description": "Opcjonalnie: Dedykowany skrót klawiszowy, który zawsze stosuje postprocessing AI do transkrypcji."
+          },
+          "show_last_transcript": {
+            "name": "Pokaż ostatnią transkrypcję",
+            "description": "Pokazuje ostatnią transkrypcję z przyciskiem Kopiuj, nie ruszając schowka, dopóki nie klikniesz."
           }
         },
         "errors": {
@@ -981,7 +985,12 @@
   "overlay": {
     "transcribing": "Transkrypcja...",
     "processing": "Przetwarzanie...",
-    "loadingModel": "Wczytywanie modelu..."
+    "loadingModel": "Wczytywanie modelu...",
+    "recovery": {
+      "title": "Nie wkleiło się?",
+      "copy": "Kopiuj",
+      "close": "Zamknij"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} może blokować 1 skrót",

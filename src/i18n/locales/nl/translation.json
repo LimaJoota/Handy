@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "Sneltoets voor naverwerking",
             "description": "Optioneel: Een specifieke sneltoets die altijd AI-naverwerking toepast op je transcriptie."
+          },
+          "show_last_transcript": {
+            "name": "Laatste transcriptie tonen",
+            "description": "Toont je laatste transcriptie met een Kopiëren-knop, zonder het klembord aan te raken tot je klikt."
           }
         },
         "errors": {
@@ -981,7 +985,12 @@
   "overlay": {
     "transcribing": "Transcriberen...",
     "processing": "Verwerken...",
-    "loadingModel": "Model laden..."
+    "loadingModel": "Model laden...",
+    "recovery": {
+      "title": "Niet geplakt?",
+      "copy": "Kopiëren",
+      "close": "Sluiten"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} blokkeert mogelijk 1 sneltoets",

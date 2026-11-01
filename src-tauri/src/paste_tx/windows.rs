@@ -14,6 +14,7 @@
 //! signals the transcript is published, then returns; the wait, guarded
 //! restore and auto-submit all finish on the worker.
 
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{mpsc::Sender, Arc, Mutex, Once};
 use std::thread;
 use std::time::Instant;
@@ -25,7 +26,7 @@ use windows::Win32::Foundation::{
     SetLastError, ERROR_SUCCESS, HANDLE, HGLOBAL, HINSTANCE, HWND, LPARAM, LRESULT, WPARAM,
 };
 
-use super::{evaluate, send_chord, TxState, WaitDecision};
+use super::{evaluate, paste_looks_lost, send_chord, TxState, WaitDecision};
 use crate::clipboard::send_return_key;
 use crate::input::EnigoState;
 use crate::settings::{AutoSubmitKey, ClipboardHandling, PasteMethod};
@@ -76,6 +77,8 @@ pub(super) struct WinTxShared {
     /// ClipboardHandling::CopyToClipboard — settle by leaving the transcript
     /// on the clipboard as plain text instead of restoring the snapshot.
     preserve_transcript: bool,
+    /// Set once the transcript has been offered back for a lost paste.
+    recovery_offered: AtomicBool,
 }
 
 /// The transaction currently holding the clipboard, if any. A new
@@ -412,6 +415,15 @@ unsafe fn publish_formats() -> Result<(), String> {
 
 fn on_timer(_hwnd: HWND, shared: &WinTxShared) {
     let now = Instant::now();
+    let lost = shared
+        .state
+        .lock()
+        .map(|st| paste_looks_lost(&st, now))
+        .unwrap_or(false);
+    if lost && !shared.recovery_offered.swap(true, Ordering::Relaxed) {
+        info!("[reliable-paste] no read after the chord; offering the transcript back");
+        crate::overlay::show_paste_recovery(&shared.app_handle, &shared.text);
+    }
     let finish = {
         let mut st = match shared.state.lock() {
             Ok(st) => st,
@@ -590,6 +602,7 @@ pub(super) fn run(
         auto_submit,
         auto_submit_key,
         preserve_transcript: clipboard_handling == ClipboardHandling::CopyToClipboard,
+        recovery_offered: AtomicBool::new(false),
     });
 
     let (ready_tx, ready_rx) = std::sync::mpsc::channel();

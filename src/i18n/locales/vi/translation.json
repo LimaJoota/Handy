@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "Phím tắt xử lý sau",
             "description": "Tùy chọn: Phím tắt chuyên dụng luôn áp dụng xử lý sau bằng AI cho bản chuyển đổi của bạn."
+          },
+          "show_last_transcript": {
+            "name": "Hiện bản ghi cuối",
+            "description": "Hiện bản ghi cuối cùng kèm nút Sao chép, không động vào bộ nhớ tạm cho đến khi bạn bấm."
           }
         },
         "errors": {
@@ -981,7 +985,12 @@
   "overlay": {
     "transcribing": "Đang chuyển đổi...",
     "processing": "Đang xử lý...",
-    "loadingModel": "Đang tải mô hình..."
+    "loadingModel": "Đang tải mô hình...",
+    "recovery": {
+      "title": "Chưa dán được?",
+      "copy": "Sao chép",
+      "close": "Đóng"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} có thể đang chặn 1 phím tắt",

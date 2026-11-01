@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "Raccourci de post-traitement",
             "description": "Facultatif : Un raccourci dédié qui applique toujours le post-traitement IA à votre transcription."
+          },
+          "show_last_transcript": {
+            "name": "Afficher la dernière transcription",
+            "description": "Affiche votre dernière transcription avec un bouton Copier, sans toucher au presse-papiers avant votre clic."
           }
         },
         "errors": {
@@ -981,7 +985,12 @@
   "overlay": {
     "transcribing": "Transcription...",
     "processing": "Traitement...",
-    "loadingModel": "Chargement du modèle..."
+    "loadingModel": "Chargement du modèle...",
+    "recovery": {
+      "title": "Pas collé ?",
+      "copy": "Copier",
+      "close": "Fermer"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} bloque peut-être 1 raccourci",

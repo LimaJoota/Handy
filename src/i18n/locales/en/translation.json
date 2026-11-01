@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "Post-Processing Hotkey",
             "description": "Optional: A dedicated hotkey that always applies AI post-processing to your transcription."
+          },
+          "show_last_transcript": {
+            "name": "Show Last Transcript",
+            "description": "Shows your last transcript with a Copy button, without touching the clipboard until you click it."
           }
         },
         "errors": {
@@ -981,7 +985,12 @@
   "overlay": {
     "transcribing": "Transcribing...",
     "processing": "Processing...",
-    "loadingModel": "Loading model..."
+    "loadingModel": "Loading model...",
+    "recovery": {
+      "title": "Didn't paste?",
+      "copy": "Copy",
+      "close": "Close"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} may be blocking 1 shortcut",

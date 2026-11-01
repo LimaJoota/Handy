@@ -24,7 +24,7 @@ use objc2_foundation::{NSArray, NSInteger, NSObject, NSString};
 use tauri::{AppHandle, Manager};
 use tauri_plugin_clipboard_manager::ClipboardExt;
 
-use super::{evaluate, send_chord, TxState, WaitDecision};
+use super::{evaluate, paste_looks_lost, send_chord, TxState, WaitDecision};
 use crate::clipboard::send_return_key;
 use crate::input::EnigoState;
 use crate::settings::{AutoSubmitKey, ClipboardHandling, PasteMethod};
@@ -195,9 +195,10 @@ fn flush_pending(app_handle: &AppHandle, enigo: &mut enigo::Enigo) {
 
 fn spawn_waiter(pending: Arc<Mutex<MacPending>>, app_handle: AppHandle) {
     thread::spawn(move || {
+        let mut recovery_offered = false;
         let outcome = loop {
             thread::sleep(Duration::from_millis(15));
-            let (decision, state_snapshot) = {
+            let (decision, state_snapshot, lost_transcript) = {
                 let p = match pending.lock() {
                     Ok(p) => p,
                     Err(_) => return,
@@ -214,12 +215,22 @@ fn spawn_waiter(pending: Arc<Mutex<MacPending>>, app_handle: AppHandle) {
                             st.ownership_lost,
                             st.injection_failed,
                         );
-                        (evaluate(&st, now), snapshot)
+                        let lost = !recovery_offered && paste_looks_lost(&st, now);
+                        (
+                            evaluate(&st, now),
+                            snapshot,
+                            lost.then(|| p.transcript.clone()),
+                        )
                     }
                     Err(_) => return,
                 };
                 result
             };
+            if let Some(transcript) = lost_transcript {
+                recovery_offered = true;
+                info!("[reliable-paste] no read after the chord; offering the transcript back");
+                crate::overlay::show_paste_recovery(&app_handle, &transcript);
+            }
             if let WaitDecision::Finish = decision {
                 break state_snapshot;
             }

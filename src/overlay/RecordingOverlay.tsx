@@ -13,7 +13,12 @@ import i18n, { syncLanguageFromSettings } from "@/i18n";
 import type { ModelStateEvent } from "@/lib/types/events";
 import { getLanguageDirection } from "@/lib/utils/rtl";
 
-type OverlayState = "recording" | "streaming" | "transcribing" | "processing";
+type OverlayState =
+  | "recording"
+  | "streaming"
+  | "transcribing"
+  | "processing"
+  | "recovery";
 
 // Number of reactive bars in the waveform (the simple, smoothed style shared by
 // every overlay form). Mic levels arrive as 16 FFT buckets; we take the first N.
@@ -24,6 +29,9 @@ const WAVE_BARS = 9;
 // Windows CPU backend), so the common case never flashes a loading notice while
 // the user is speaking; cold loads can take 40s+.
 const SLOW_MODEL_LOAD_MS = 2000;
+
+// How long the paste-recovery card stays up; resting the pointer on it holds it.
+const RECOVERY_VISIBLE_MS = 10000;
 
 const RecordingOverlay: React.FC = () => {
   const { t } = useTranslation();
@@ -61,6 +69,9 @@ const RecordingOverlay: React.FC = () => {
   // True once live text overflows the cap. A top overlay fades its top edge only
   // while overflowing, so the resting first line stays crisp flush under the pill.
   const [overflowing, setOverflowing] = useState(false);
+  // Transcript offered back when a paste didn't land (see show_paste_recovery).
+  const [recoveryText, setRecoveryText] = useState("");
+  const [recoveryHeld, setRecoveryHeld] = useState(false);
 
   const smoothedLevelsRef = useRef<number[]>(Array(16).fill(0));
   // Live-text scroll-back: the text region "sticks" to the newest line while the
@@ -112,6 +123,11 @@ const RecordingOverlay: React.FC = () => {
         setIsVisible(false);
         setCaptureReady(false);
       });
+
+      const unlistenRecovery = await listen<string>(
+        "paste-recovery-text",
+        (event) => setRecoveryText(event.payload),
+      );
 
       const unlistenReady = await listen("recording-ready", () => {
         setElapsed(0);
@@ -170,6 +186,7 @@ const RecordingOverlay: React.FC = () => {
       return () => {
         unlistenShow();
         unlistenHide();
+        unlistenRecovery();
         unlistenReady();
         unlistenLevel();
         unlistenStream();
@@ -204,6 +221,16 @@ const RecordingOverlay: React.FC = () => {
   useEffect(() => {
     if (modelLoadSlow && state === "streaming") setLoadNoticeShown(true);
   }, [modelLoadSlow, state, session]);
+
+  // The recovery card closes on its own unless the pointer is resting on it.
+  useEffect(() => {
+    if (state !== "recovery" || !isVisible || recoveryHeld) return;
+    const id = setTimeout(
+      () => commands.dismissPasteRecovery(),
+      RECOVERY_VISIBLE_MS,
+    );
+    return () => clearTimeout(id);
+  }, [state, isVisible, recoveryHeld, recoveryText]);
 
   // Each fresh streaming session starts pinned to the bottom, fade cleared.
   useEffect(() => {
@@ -284,6 +311,54 @@ const RecordingOverlay: React.FC = () => {
       <div className="sbase-r">{showCancel && cancelBtn}</div>
     </div>
   );
+
+  // ---- Paste recovery: the transcript that may not have landed, with Copy.
+  // Nothing touches the clipboard until Copy is clicked.
+  if (state === "recovery") {
+    return (
+      <div dir={direction} className={`ov-stage ${position}`}>
+        <div
+          className="scard open srecover"
+          onMouseEnter={() => setRecoveryHeld(true)}
+          onMouseLeave={() => setRecoveryHeld(false)}
+        >
+          <div className="stext">
+            <div className="stext-clip">
+              <div className="stext-cap">
+                <p>{recoveryText}</p>
+              </div>
+            </div>
+          </div>
+          <div className="sbase">
+            <div className="sbase-l" />
+            <span className="swork-label">{t("overlay.recovery.title")}</span>
+            <div className="sbase-r">
+              <button
+                className="scopy"
+                onClick={() => commands.copyPasteRecoveryText()}
+              >
+                {t("overlay.recovery.copy")}
+              </button>
+              <button
+                className="sx"
+                aria-label={t("overlay.recovery.close")}
+                onClick={() => commands.dismissPasteRecovery()}
+              >
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path
+                    d="M4 4 L12 12 M12 4 L4 12"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // ---- Live overlay: a pill that sculpts open into a panel ----
   if (state === "streaming") {

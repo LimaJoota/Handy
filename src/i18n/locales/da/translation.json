@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "Genvej til efterbehandling",
             "description": "Valgfrit: En dedikeret genvej, der altid anvender AI-efterbehandling på din transskription."
+          },
+          "show_last_transcript": {
+            "name": "Vis seneste transskription",
+            "description": "Viser din seneste transskription med en Kopiér-knap uden at røre udklipsholderen, før du klikker."
           }
         },
         "errors": {
@@ -981,7 +985,12 @@
   "overlay": {
     "transcribing": "Transskriberer...",
     "processing": "Behandler...",
-    "loadingModel": "Indlæser model..."
+    "loadingModel": "Indlæser model...",
+    "recovery": {
+      "title": "Blev det ikke indsat?",
+      "copy": "Kopiér",
+      "close": "Luk"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} blokerer muligvis 1 genvej",

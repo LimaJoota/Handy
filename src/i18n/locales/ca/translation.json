@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "Drecera de postprocessament",
             "description": "Opcional: una drecera específica que sempre aplica postprocessament amb IA a la transcripció."
+          },
+          "show_last_transcript": {
+            "name": "Mostra l'última transcripció",
+            "description": "Mostra l'última transcripció amb un botó Copia, sense tocar el porta-retalls fins que hi facis clic."
           }
         },
         "errors": {
@@ -981,7 +985,12 @@
   "overlay": {
     "transcribing": "S'està transcrivint...",
     "processing": "S'està processant...",
-    "loadingModel": "S'està carregant el model..."
+    "loadingModel": "S'està carregant el model...",
+    "recovery": {
+      "title": "No s'ha enganxat?",
+      "copy": "Copia",
+      "close": "Tanca"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} pot estar blocant 1 drecera",

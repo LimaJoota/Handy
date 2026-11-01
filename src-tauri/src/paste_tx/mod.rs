@@ -128,6 +128,24 @@ impl TxState {
     }
 }
 
+/// How long after the paste chord a missing read counts as a lost paste, so
+/// the transcript is offered back (see `overlay::show_paste_recovery`). Reads
+/// normally land within ~100 ms; the clipboard is still restored on the usual
+/// schedule.
+pub(crate) const RECOVERY_DELAY: Duration = Duration::from_secs(2);
+
+/// Whether the paste looks lost: nobody read the transcript after the chord,
+/// and the user didn't take the clipboard back by copying something else.
+pub(crate) fn paste_looks_lost(state: &TxState, now: Instant) -> bool {
+    if state.ownership_lost || state.cancelled || state.any_receipt_after_injection() {
+        return false;
+    }
+    state.injection_failed
+        || state
+            .injected_at
+            .is_some_and(|injected| now.duration_since(injected) >= RECOVERY_DELAY)
+}
+
 pub(crate) enum WaitDecision {
     KeepWaiting,
     /// Stop waiting; settle the transaction (auto-submit + guarded restore).
@@ -272,6 +290,34 @@ mod tests {
         let mut s = state_after_publish(FAILED_INJECTION_TIMEOUT);
         s.injection_failed = true;
         assert!(matches!(evaluate(&s, Instant::now()), WaitDecision::Finish));
+    }
+
+    #[test]
+    fn paste_is_lost_without_a_read_after_the_recovery_delay() {
+        let mut s = state_after_publish(RECOVERY_DELAY + Duration::from_millis(50));
+        s.injected_at = Some(Instant::now() - RECOVERY_DELAY);
+        assert!(paste_looks_lost(&s, Instant::now()));
+    }
+
+    #[test]
+    fn paste_is_not_lost_before_the_recovery_delay_or_once_read() {
+        let mut s = state_after_publish(Duration::from_millis(300));
+        s.injected_at = Some(Instant::now() - Duration::from_millis(250));
+        assert!(!paste_looks_lost(&s, Instant::now()));
+
+        s.injected_at = Some(Instant::now() - RECOVERY_DELAY);
+        s.receipts.push(Instant::now() - Duration::from_millis(100));
+        assert!(!paste_looks_lost(&s, Instant::now()));
+    }
+
+    #[test]
+    fn paste_is_lost_when_the_chord_failed_but_not_when_ownership_lost() {
+        let mut s = state_after_publish(Duration::from_millis(10));
+        s.injection_failed = true;
+        assert!(paste_looks_lost(&s, Instant::now()));
+
+        s.ownership_lost = true;
+        assert!(!paste_looks_lost(&s, Instant::now()));
     }
 
     #[test]
