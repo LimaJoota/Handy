@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "Son İşlem Kısayolu",
             "description": "İsteğe bağlı: Transkripsiyonunuza her zaman yapay zekâ ile son işlem uygulayan özel bir kısayol tuşu."
+          },
+          "show_last_transcript": {
+            "name": "Son dökümü göster",
+            "description": "Son dökümünü bir Kopyala düğmesiyle gösterir; sen tıklayana kadar panoya dokunmaz."
           }
         },
         "errors": {
@@ -958,7 +962,12 @@
   "overlay": {
     "transcribing": "Transkribe ediliyor...",
     "processing": "İşleniyor...",
-    "loadingModel": "Model yükleniyor..."
+    "loadingModel": "Model yükleniyor...",
+    "recovery": {
+      "title": "Yapıştırılmadı mı?",
+      "copy": "Kopyala",
+      "close": "Kapat"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} 1 kısayolu engelliyor olabilir",

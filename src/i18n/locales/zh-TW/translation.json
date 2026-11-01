@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "後處理快捷鍵",
             "description": "可選：專用快捷鍵，使用時一律對轉錄結果套用 AI 後處理"
+          },
+          "show_last_transcript": {
+            "name": "顯示上次轉錄",
+            "description": "顯示上次的轉錄內容與複製按鈕，點擊之前不會更動剪貼簿。"
           }
         },
         "errors": {
@@ -958,7 +962,12 @@
   "overlay": {
     "transcribing": "正在轉錄...",
     "processing": "處理中...",
-    "loadingModel": "正在載入模型..."
+    "loadingModel": "正在載入模型...",
+    "recovery": {
+      "title": "沒有貼上？",
+      "copy": "複製",
+      "close": "關閉"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} 可能正在阻擋 1 個快捷鍵",

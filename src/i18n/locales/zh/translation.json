@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "后处理快捷键",
             "description": "可选：一个专用快捷键，始终对您的转录应用 AI 后处理。"
+          },
+          "show_last_transcript": {
+            "name": "显示上次转录",
+            "description": "显示上次的转录内容和复制按钮，点击之前不会改动剪贴板。"
           }
         },
         "errors": {
@@ -958,7 +962,12 @@
   "overlay": {
     "transcribing": "正在转录...",
     "processing": "处理中...",
-    "loadingModel": "正在加载模型..."
+    "loadingModel": "正在加载模型...",
+    "recovery": {
+      "title": "没有粘贴上？",
+      "copy": "复制",
+      "close": "关闭"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} 可能正在阻止 1 个快捷键",

@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "후처리 단축키",
             "description": "선택 사항: 항상 AI 후처리를 적용하는 전용 단축키입니다."
+          },
+          "show_last_transcript": {
+            "name": "마지막 받아쓰기 보기",
+            "description": "마지막 받아쓰기를 복사 버튼과 함께 보여 줍니다. 버튼을 누르기 전까지 클립보드는 건드리지 않습니다."
           }
         },
         "errors": {
@@ -958,7 +962,12 @@
   "overlay": {
     "transcribing": "텍스트로 변환 중...",
     "processing": "처리 중...",
-    "loadingModel": "모델 로딩 중..."
+    "loadingModel": "모델 로딩 중...",
+    "recovery": {
+      "title": "붙여넣지 못했나요?",
+      "copy": "복사",
+      "close": "닫기"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}}이(가) 단축키 1개를 차단하고 있을 수 있습니다",

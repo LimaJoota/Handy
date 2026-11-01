@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "Klávesa pro následné zpracování",
             "description": "Volitelné: Vyhrazená klávesová zkratka, která vždy použije AI následné zpracování na váš přepis."
+          },
+          "show_last_transcript": {
+            "name": "Zobrazit poslední přepis",
+            "description": "Zobrazí poslední přepis s tlačítkem Kopírovat a schránky se nedotkne, dokud neklepnete."
           }
         },
         "errors": {
@@ -958,7 +962,12 @@
   "overlay": {
     "transcribing": "Přepisuji...",
     "processing": "Zpracovávám...",
-    "loadingModel": "Načítání modelu..."
+    "loadingModel": "Načítání modelu...",
+    "recovery": {
+      "title": "Nevložilo se?",
+      "copy": "Kopírovat",
+      "close": "Zavřít"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} může blokovat 1 zkratku",

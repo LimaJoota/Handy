@@ -990,6 +990,20 @@ pub fn get_default_settings() -> AppSettings {
             current_binding: "escape".to_string(),
         },
     );
+    #[cfg(target_os = "macos")]
+    let default_show_last_transcript_shortcut = "option+shift+h";
+    #[cfg(not(target_os = "macos"))]
+    let default_show_last_transcript_shortcut = "ctrl+alt+shift+h";
+    bindings.insert(
+        "show_last_transcript".to_string(),
+        ShortcutBinding {
+            id: "show_last_transcript".to_string(),
+            name: "Show Last Transcript".to_string(),
+            description: "Shows the last transcript with a Copy button.".to_string(),
+            default_binding: default_show_last_transcript_shortcut.to_string(),
+            current_binding: default_show_last_transcript_shortcut.to_string(),
+        },
+    );
 
     AppSettings {
         settings_schema_version: default_settings_schema_version(),

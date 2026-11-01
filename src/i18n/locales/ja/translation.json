@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "後処理のショートカット",
             "description": "文字起こしに常に AI 後処理を適用するキーボードショートカット。 (任意)"
+          },
+          "show_last_transcript": {
+            "name": "最後の文字起こしを表示",
+            "description": "最後の文字起こしをコピーボタン付きで表示します。クリックするまでクリップボードには触れません。"
           }
         },
         "errors": {
@@ -958,7 +962,12 @@
   "overlay": {
     "transcribing": "文字起こし中…",
     "processing": "処理中…",
-    "loadingModel": "モデルを読み込み中…"
+    "loadingModel": "モデルを読み込み中…",
+    "recovery": {
+      "title": "貼り付けられませんでしたか？",
+      "copy": "コピー",
+      "close": "閉じる"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} が1個のショートカットをブロックしている可能性があります",

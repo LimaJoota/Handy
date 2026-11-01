@@ -407,3 +407,36 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Paste recovery: the transcript reads upright, unfaded and selectable (the
+   Live preview is italic and fades its oldest line), and Copy is the one
+   filled control in the overlay. */
+.srecover .stext-cap {
+  font-style: normal;
+  -webkit-mask-image: none;
+  mask-image: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.scopy {
+  height: 22px;
+  flex: none;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-background-ui);
+  cursor: pointer;
+  transition:
+    opacity 150ms ease,
+    transform 100ms ease;
+}
+.scopy:hover {
+  opacity: 0.85;
+}
+.scopy:active {
+  transform: scale(0.96);
+}

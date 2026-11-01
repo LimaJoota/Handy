@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "Tasto di post-elaborazione",
             "description": "Facoltativo: Un tasto di scelta rapida dedicato che applica sempre la post-elaborazione IA alla trascrizione."
+          },
+          "show_last_transcript": {
+            "name": "Mostra ultima trascrizione",
+            "description": "Mostra l'ultima trascrizione con un pulsante Copia, senza toccare gli appunti finché non fai clic."
           }
         },
         "errors": {
@@ -958,7 +962,12 @@
   "overlay": {
     "transcribing": "Trascrizione...",
     "processing": "Elaborazione...",
-    "loadingModel": "Caricamento del modello..."
+    "loadingModel": "Caricamento del modello...",
+    "recovery": {
+      "title": "Non incollato?",
+      "copy": "Copia",
+      "close": "Chiudi"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} potrebbe bloccare 1 scorciatoia",

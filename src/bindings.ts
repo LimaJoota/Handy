@@ -570,6 +570,23 @@ async showMainWindowCommand() : Promise<Result<null, string>> {
 async cancelOperation() : Promise<void> {
     await TAURI_INVOKE("cancel_operation");
 },
+/**
+ * Copies the recovery transcript (the user clicked Copy) and closes the card.
+ */
+async copyPasteRecoveryText() : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("copy_paste_recovery_text") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Closes the recovery card (its close button or timeout) without copying.
+ */
+async dismissPasteRecovery() : Promise<void> {
+    await TAURI_INVOKE("dismiss_paste_recovery");
+},
 async isPortable() : Promise<boolean> {
     return await TAURI_INVOKE("is_portable");
 },

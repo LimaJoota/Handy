@@ -345,6 +345,10 @@
           "transcribe_with_post_process": {
             "name": "Pintasan Pascaproses",
             "description": "Opsional: pintasan khusus yang selalu menerapkan pascaproses AI pada transkripsi Anda."
+          },
+          "show_last_transcript": {
+            "name": "Tampilkan transkrip terakhir",
+            "description": "Menampilkan transkrip terakhir dengan tombol Salin, tanpa menyentuh papan klip sampai Anda mengekliknya."
           }
         },
         "errors": {
@@ -958,7 +962,12 @@
   "overlay": {
     "transcribing": "Mentranskripsikan...",
     "processing": "Memproses...",
-    "loadingModel": "Memuat model..."
+    "loadingModel": "Memuat model...",
+    "recovery": {
+      "title": "Tidak tertempel?",
+      "copy": "Salin",
+      "close": "Tutup"
+    }
   },
   "secureInput": {
     "blockedWithCulprit_one": "{{name}} mungkin memblokir 1 pintasan",

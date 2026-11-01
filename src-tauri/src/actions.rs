@@ -939,6 +939,25 @@ impl ShortcutAction for CancelAction {
 }
 
 // Test Action
+/// Brings back the last transcript in the overlay's recovery card, for a
+/// paste that didn't land. Nothing touches the clipboard until Copy.
+struct ShowLastTranscriptAction;
+
+impl ShortcutAction for ShowLastTranscriptAction {
+    fn start(&self, app: &AppHandle, _binding_id: &str, _shortcut_str: &str) {
+        let history_manager = app.state::<Arc<HistoryManager>>();
+        match history_manager.get_latest_completed_entry() {
+            Ok(Some(entry)) => {
+                crate::overlay::show_paste_recovery(app, crate::tray::last_transcript_text(&entry))
+            }
+            Ok(None) => debug!("No transcript to show yet"),
+            Err(e) => error!("Failed to fetch the last transcript: {}", e),
+        }
+    }
+
+    fn stop(&self, _app: &AppHandle, _binding_id: &str, _shortcut_str: &str) {}
+}
+
 struct TestAction;
 
 impl ShortcutAction for TestAction {
@@ -977,6 +996,10 @@ pub static ACTION_MAP: Lazy<HashMap<String, Arc<dyn ShortcutAction>>> = Lazy::ne
     map.insert(
         "cancel".to_string(),
         Arc::new(CancelAction) as Arc<dyn ShortcutAction>,
+    );
+    map.insert(
+        "show_last_transcript".to_string(),
+        Arc::new(ShowLastTranscriptAction) as Arc<dyn ShortcutAction>,
     );
     map.insert(
         "test".to_string(),
