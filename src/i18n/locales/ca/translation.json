@@ -3,6 +3,7 @@
     "settings": "Configuració...",
     "checkUpdates": "Comprova si hi ha actualitzacions...",
     "copyLastTranscript": "Copia l'última transcripció",
+    "recentTranscripts": "Transcripcions recents",
     "unloadModel": "Allibera el model de la memòria",
     "model": "Model",
     "quit": "Surt",
