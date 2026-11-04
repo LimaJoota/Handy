@@ -2,7 +2,7 @@
 
 # Handy, tuned
 
-**A fork of [Handy](https://github.com/cjpais/Handy), the offline speech-to-text app, built around one rule: what you dictate never gets lost, and it reads like you wrote it.**
+**A fork of [Handy](https://github.com/cjpais/Handy), the offline speech-to-text app, built around one rule: what you dictate never gets lost, and it reads like you wrote it. Based on Handy 0.10.0.**
 
 [Download for macOS](https://github.com/LimaJoota/Handy/releases/latest) · [What changed](#what-changed) · [Design notes](#design-notes) · [Build](#build-from-source) · [Upstream README](https://github.com/cjpais/Handy#readme)
 
@@ -26,14 +26,15 @@ Everything here stays local. Nothing is sent anywhere, and the clipboard is neve
 
 ## What changed
 
-|     | Feature                                                                                       | Where                             |
-| --- | --------------------------------------------------------------------------------------------- | --------------------------------- |
-| 🎨  | **Accent color**: Pink, System, Purple or any custom color                                    | About → Accent Color              |
-| ✍️  | **Real punctuation in Portuguese** by switching to Parakeet TDT 0.6B v3 (benchmarked below)   | Models                            |
-| 🔁  | **Exact word replacements**: `Randy → Handy`, no fuzzy guessing                               | Advanced → Word Replacements      |
-| 🛟  | **Paste recovery**: if the target app never reads the paste, the overlay offers the text back | Automatic, with reliable paste on |
-| ⌥⇧H | **Last 5 transcripts on demand**, each with its own Copy                                      | Shortcut, rebindable in General   |
-| 📋  | **Last 5 transcripts in the menu bar**, one click to copy                                     | Handy's tray menu                 |
+|     | Feature                                                                                           | Where                             |
+| --- | ------------------------------------------------------------------------------------------------- | --------------------------------- |
+| 🎨  | **Accent color**: Pink, System, Purple or any custom color                                        | About → Accent Color              |
+| ✍️  | **Real punctuation in Portuguese** by switching to Parakeet TDT 0.6B v3 (benchmarked below)       | Models                            |
+| 🔁  | **Exact word replacements**: `Randy → Handy`, no fuzzy guessing                                   | Advanced → Word Replacements      |
+| 🛟  | **Paste recovery**: if the target app never reads the paste, the overlay offers the text back     | Automatic, with reliable paste on |
+| ⌥⇧H | **Last 5 transcripts on demand**, each with its own Copy                                          | Shortcut, rebindable in General   |
+| 📋  | **Last 5 transcripts in the menu bar**, one click to copy                                         | Handy's tray menu                 |
+| 🔐  | **No more stuck permissions after an update**: stale macOS grants are cleared before asking again | Onboarding                        |
 
 ## Design notes
 
@@ -142,6 +143,14 @@ flowchart LR
 - **No disk reads on the main thread.** Upstream computes the tray snapshot off the main thread on purpose, so a busy worker can never freeze the menu bar. The recent transcripts join that snapshot, full text included, so a click copies exactly what the menu showed without touching SQLite. The menu refreshes when History adds, updates or deletes an entry.
 - **Labels that behave.** Whitespace collapsed to one line, cut at 48 characters with an ellipsis, and `&` escaped on Windows where menus read it as a mnemonic.
 
+### 🔐 Permissions that survive an update
+
+**The bug.** [#1618](https://github.com/cjpais/Handy/issues/1618): macOS ties a permission to the app's code signature. After an update the old entry stays in System Settings, looks switched on, and no longer matches the new build. macOS neither honors it nor asks again, so onboarding sits on "Waiting" until you clear it from a terminal. I hit it on every rebuild, for Accessibility and for the microphone.
+
+**The fix.** Handy resets its own entry with `tccutil` right before asking, so macOS prompts and records the running build. It only runs while the permission reads as not granted, so a working grant can't be lost.
+
+This ports the approach of [#2057](https://github.com/cjpais/Handy/pull/2057) by notenderdreams, whose target file was replaced in 0.10, and adds the microphone.
+
 ## Install
 
 1. Download `Handy-macOS-arm64.zip` from [Releases](https://github.com/LimaJoota/Handy/releases/latest) (Apple Silicon).
@@ -166,8 +175,8 @@ Full platform notes are in [BUILD.md](BUILD.md).
 
 ## Engineering
 
-- **Branches, one feature each**, all based on upstream `main`: [`feat/accent-color`](https://github.com/LimaJoota/Handy/tree/feat/accent-color), [`feat/word-replacements`](https://github.com/LimaJoota/Handy/tree/feat/word-replacements), [`feat/paste-recovery`](https://github.com/LimaJoota/Handy/tree/feat/paste-recovery) (includes the tray list), [`feat/tray-recent-transcripts`](https://github.com/LimaJoota/Handy/tree/feat/tray-recent-transcripts). [`pessoal`](https://github.com/LimaJoota/Handy/tree/pessoal) is all of them together and is what the release is built from.
-- **Tests:** 38 Rust unit tests cover these paths: accent validation, settings salvage, replacement rules, lost-paste detection, tray labels and the history queries.
+- **Branches, one feature each**, all on Handy 0.10.0: [`feat/accent-color`](https://github.com/LimaJoota/Handy/tree/feat/accent-color), [`feat/word-replacements`](https://github.com/LimaJoota/Handy/tree/feat/word-replacements), [`feat/paste-recovery`](https://github.com/LimaJoota/Handy/tree/feat/paste-recovery) (includes the tray list), [`feat/tray-recent-transcripts`](https://github.com/LimaJoota/Handy/tree/feat/tray-recent-transcripts), [`fix/macos-stale-permissions`](https://github.com/LimaJoota/Handy/tree/fix/macos-stale-permissions). [`pessoal`](https://github.com/LimaJoota/Handy/tree/pessoal) is all of them together and is what the release is built from.
+- **Tests:** the full Rust suite passes (355 tests), including accent validation, settings salvage, replacement rules, lost-paste detection, tray labels and the history queries.
 - **Clean gates:** `tsc`, ESLint, Prettier, `cargo fmt` and the translation checker all pass.
 - **i18n:** every new string ships in all 26 locales Handy supports.
 - **Follows upstream patterns**: settings as typed Rust enums with salvage-on-load, Tauri commands mirrored in `bindings.ts`, events for cross-webview sync. Easy to rebase, easy to upstream piece by piece.
