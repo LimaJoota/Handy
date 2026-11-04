@@ -13,7 +13,7 @@ import type {
   WordReplacement,
 } from "@/bindings";
 import { commands } from "@/bindings";
-import { toast } from "sonner";
+import { notify } from "@/stores/noticeStore";
 
 interface SettingsStore {
   settings: Settings | null;
@@ -180,6 +180,15 @@ const settingUpdaters: {
     commands.changeExperimentalEnabledSetting(value as boolean),
   lazy_stream_close: (value) =>
     commands.changeLazyStreamCloseSetting(value as boolean),
+  airpods_mode: async (value) => {
+    const result = await commands.changeAirpodsModeSetting(value as boolean);
+    if (result.status === "error") {
+      // Rejected changes (e.g. mid-recording) roll the toggle back via the
+      // throw below; the notice tells the user why.
+      notify({ title: result.error });
+      throw new Error(result.error);
+    }
+  },
   overlay_style: (value) => commands.changeOverlayStyleSetting(value as string),
   vad_enabled: (value) => commands.changeVadEnabledSetting(value as boolean),
   long_form_chunking: (value) =>
@@ -188,8 +197,8 @@ const settingUpdaters: {
     const result = await commands.changeVadBackendSetting(value as VadBackend);
     if (result.status === "error") {
       // Rejected switches (e.g. mid-recording) roll the dropdown back via the
-      // throw below; the toast tells the user why.
-      toast.error(result.error);
+      // throw below; the notice tells the user why.
+      notify({ title: result.error });
       throw new Error(result.error);
     }
   },
