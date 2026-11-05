@@ -550,7 +550,7 @@ impl ShortcutAction for TranscribeAction {
         // A streaming model decodes from the first sample, so it needs none.
         // Before the stream starts, which would count as activity.
         if live != LiveDecode::Stream {
-            tm.warm_up_if_idle();
+            tm.warm_up_while_recording();
         }
         if live != LiveDecode::None {
             tm.start_stream();

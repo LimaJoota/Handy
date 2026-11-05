@@ -47,6 +47,8 @@ const STREAM_PERF_LOG_INTERVAL: Duration = Duration::from_secs(5);
 const WARM_UP_SAMPLES: usize = 16_000;
 /// A model used more recently than this hasn't had time to leave memory.
 const WARM_UP_AFTER_IDLE_MS: u64 = 10_000;
+/// A model left alone for 30 s was already slow to come back under pressure.
+const WARM_UP_EVERY: Duration = Duration::from_secs(15);
 
 pub(crate) fn panic_payload_message(payload: &(dyn std::any::Any + Send)) -> String {
     if let Some(message) = payload.downcast_ref::<&str>() {
@@ -1058,35 +1060,54 @@ impl TranscriptionManager {
         self.transcribe_cpp(mark, batch, audio)
     }
 
-    /// Brings a model that sat idle back into memory while the user is still
-    /// speaking. Under memory pressure macOS pages out an idle model within a
-    /// minute, and the next transcription pays seconds to read it back.
-    pub fn warm_up_if_idle(&self) {
-        let Some(info) = self.engine.loaded() else {
-            return;
-        };
-        let idle_ms = Self::now_ms().saturating_sub(self.last_activity.load(Ordering::Relaxed));
-        if !should_warm_up(info.on_gpu, idle_ms) {
+    /// Keeps the model in memory while the user speaks. Under memory pressure
+    /// macOS pages out an idle model within a minute, and the next transcription
+    /// pays seconds to read it back. A long recording can outlast one warm-up,
+    /// so it repeats until the recording ends.
+    pub fn warm_up_while_recording(&self) {
+        if !cfg!(target_os = "macos") {
             return;
         }
+        let idle_ms = Self::now_ms().saturating_sub(self.last_activity.load(Ordering::Relaxed));
+        let mut due = warm_up_is_due(self.is_model_loaded(), idle_ms);
         let this = self.clone();
-        thread::spawn(move || {
-            let started = Instant::now();
-            match this.warm_up() {
-                Ok(()) => debug!("Warmed up the idle model in {:?}", started.elapsed()),
-                Err(e) => debug!("Model warm-up stopped: {}", e),
+        thread::spawn(move || loop {
+            if due {
+                let started = Instant::now();
+                match this.warm_up() {
+                    Ok(true) => debug!("Warmed up the model in {:?}", started.elapsed()),
+                    Ok(false) => return,
+                    Err(e) => {
+                        debug!("Model warm-up stopped: {}", e);
+                        return;
+                    }
+                }
+            }
+            thread::sleep(WARM_UP_EVERY);
+            due = true;
+            let recording = this
+                .app_handle
+                .try_state::<Arc<AudioRecordingManager>>()
+                .is_some_and(|recorder| recorder.is_recording());
+            if !recording {
+                return;
             }
         });
     }
 
     /// Decodes silence and drops the text. The transcription queues behind it.
-    fn warm_up(&self) -> Result<()> {
+    /// Off the GPU it does nothing and returns false: a CPU run could take long
+    /// enough to hold up a short dictation.
+    fn warm_up(&self) -> Result<bool> {
         let audio = vec![0.0; WARM_UP_SAMPLES];
         let mark = self.engine.cancel_mark();
         let batch = self.batch_context(&audio)?;
+        if !batch.info.on_gpu {
+            return Ok(false);
+        }
         self.run_batch(mark, audio, &batch.setup.run_options, &batch.active_model)
             .map_err(engine_error)?;
-        Ok(())
+        Ok(true)
     }
 
     /// Waits out any model load, then reads what a batch transcription of
@@ -1554,10 +1575,9 @@ impl StreamPerf {
     }
 }
 
-/// Only on a Mac's GPU, where it was measured and a warm-up takes tens of
-/// milliseconds. On a CPU it could take long enough to hold up a short dictation.
-fn should_warm_up(on_gpu: bool, idle_ms: u64) -> bool {
-    cfg!(target_os = "macos") && on_gpu && idle_ms >= WARM_UP_AFTER_IDLE_MS
+/// A model still loading hasn't run yet, so it's as cold as an idle one.
+fn warm_up_is_due(loaded: bool, idle_ms: u64) -> bool {
+    !loaded || idle_ms >= WARM_UP_AFTER_IDLE_MS
 }
 
 fn real_time_factor(audio_secs: f64, compute_secs: f64) -> f64 {
@@ -2030,13 +2050,10 @@ mod tests {
     }
 
     #[test]
-    fn warm_up_needs_an_idle_model_on_the_gpu() {
-        assert!(!should_warm_up(true, WARM_UP_AFTER_IDLE_MS - 1));
-        assert!(!should_warm_up(false, WARM_UP_AFTER_IDLE_MS));
-        assert_eq!(
-            should_warm_up(true, WARM_UP_AFTER_IDLE_MS),
-            cfg!(target_os = "macos")
-        );
+    fn warm_up_is_due_for_an_idle_or_loading_model() {
+        assert!(!warm_up_is_due(true, WARM_UP_AFTER_IDLE_MS - 1));
+        assert!(warm_up_is_due(true, WARM_UP_AFTER_IDLE_MS));
+        assert!(warm_up_is_due(false, 0));
     }
 
     #[test]
