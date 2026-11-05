@@ -546,10 +546,14 @@ impl ShortcutAction for TranscribeAction {
             streaming: model_supports_streaming,
             long_form: false,
         };
-        if live_decode(expected_model, settings.long_form_chunking) != LiveDecode::None {
-            tm.start_stream();
-        } else {
+        let live = live_decode(expected_model, settings.long_form_chunking);
+        // A streaming model decodes from the first sample, so it needs none.
+        // Before the stream starts, which would count as activity.
+        if live != LiveDecode::Stream {
             tm.warm_up_if_idle();
+        }
+        if live != LiveDecode::None {
+            tm.start_stream();
         }
         let plan_elapsed = plan_started.elapsed();
 
