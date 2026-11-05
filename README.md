@@ -22,7 +22,7 @@ I dictate all day in Portuguese: messages, specs, prompts, notes. Handy got the 
 
 Plus the pink. Upstream has declined accent-color PRs twice ([#1232](https://github.com/cjpais/Handy/pull/1232), [#551](https://github.com/cjpais/Handy/pull/551)) and says visual preferences belong in forks, while [#1212](https://github.com/cjpais/Handy/discussions/1212) keeps collecting votes. So this is that fork.
 
-Everything here stays local. Nothing is sent anywhere, and the clipboard is never touched without a click.
+Everything here stays local. Nothing is sent anywhere, and by default the clipboard is never touched without a click.
 
 ## What changed
 
@@ -32,6 +32,7 @@ Everything here stays local. Nothing is sent anywhere, and the clipboard is neve
 | ✍️  | **Real punctuation in Portuguese** by switching to Parakeet TDT 0.6B v3 (benchmarked below)       | Models                            |
 | 🔁  | **Exact word replacements**: `Randy → Handy`, no fuzzy guessing                                   | Advanced → Word Replacements      |
 | 🛟  | **Paste recovery**: if the target app never reads the paste, the overlay offers the text back     | Automatic, with reliable paste on |
+| 📎  | **Copy if Not Pasted**: the transcript stays on the clipboard only when the paste missed          | Advanced → Clipboard Handling     |
 | ⌥⇧H | **Last 5 transcripts on demand**, each with its own Copy                                          | Shortcut, rebindable in General   |
 | 📋  | **Last 5 transcripts in the menu bar**, one click to copy                                         | Handy's tray menu                 |
 | 🔐  | **No more stuck permissions after an update**: stale macOS grants are cleared before asking again | Onboarding                        |
@@ -124,6 +125,8 @@ flowchart LR
 - **No focus stealing.** The overlay is a non-activating panel, so you keep typing where you were. That's also why there is no Esc to close it: it never has keyboard focus. It closes after 10 s, stays open while the pointer rests on it, and has a close button.
 - **Known limit, handled.** Some apps read the pasteboard on Cmd+V even with no text field focused, so the paste counts as delivered when it wasn't. Detection can't fix that, which is why there are two manual ways back below.
 
+**Copy if Not Pasted**, [IaroslavMazur's idea](https://github.com/cjpais/Handy/discussions/1379#discussioncomment-19421565). Same signal, opposite trade-off: no click needed, at the cost of the clipboard when a paste misses. Read means restore the previous clipboard, no read means leave the transcript there. Off by default, and offered only with reliable paste on, since the legacy path has no such signal.
+
 ### ⌥⇧H and the menu bar: the manual ways back
 
 **⌥⇧H** opens the same card with your last five transcripts, newest first, each with its own Copy. When a paste just failed, that one goes first under "Não colou?" ("Didn't paste?").
@@ -175,12 +178,12 @@ Full platform notes are in [BUILD.md](BUILD.md).
 
 ## Engineering
 
-- **Branches, one feature each**, all on Handy 0.10.0: [`feat/accent-color`](https://github.com/LimaJoota/Handy/tree/feat/accent-color), [`feat/word-replacements`](https://github.com/LimaJoota/Handy/tree/feat/word-replacements), [`feat/paste-recovery`](https://github.com/LimaJoota/Handy/tree/feat/paste-recovery) (includes the tray list), [`feat/tray-recent-transcripts`](https://github.com/LimaJoota/Handy/tree/feat/tray-recent-transcripts), [`fix/macos-stale-permissions`](https://github.com/LimaJoota/Handy/tree/fix/macos-stale-permissions). [`pessoal`](https://github.com/LimaJoota/Handy/tree/pessoal) is all of them together and is what the release is built from.
-- **Tests:** the full Rust suite passes (355 tests), including accent validation, settings salvage, replacement rules, lost-paste detection, tray labels and the history queries.
+- **Branches, one feature each**, all on Handy 0.10.0: [`feat/accent-color`](https://github.com/LimaJoota/Handy/tree/feat/accent-color), [`feat/word-replacements`](https://github.com/LimaJoota/Handy/tree/feat/word-replacements), [`feat/paste-recovery`](https://github.com/LimaJoota/Handy/tree/feat/paste-recovery) (includes the tray list), [`feat/tray-recent-transcripts`](https://github.com/LimaJoota/Handy/tree/feat/tray-recent-transcripts), [`feat/copy-if-not-pasted`](https://github.com/LimaJoota/Handy/tree/feat/copy-if-not-pasted), [`fix/macos-stale-permissions`](https://github.com/LimaJoota/Handy/tree/fix/macos-stale-permissions). [`pessoal`](https://github.com/LimaJoota/Handy/tree/pessoal) is all of them together and is what the release is built from.
+- **Tests:** the full Rust suite passes (357 tests), including accent validation, settings salvage, replacement rules, lost-paste detection, tray labels and the history queries.
 - **Clean gates:** `tsc`, ESLint, Prettier, `cargo fmt` and the translation checker all pass.
 - **i18n:** every new string ships in all 26 locales Handy supports.
 - **Follows upstream patterns**: settings as typed Rust enums with salvage-on-load, Tauri commands mirrored in `bindings.ts`, events for cross-webview sync. Easy to rebase, easy to upstream piece by piece.
 
 ## Credits
 
-[Handy](https://github.com/cjpais/Handy) by CJ Pais and contributors, MIT licensed. Word replacements by marko-kraemer ([#1533](https://github.com/cjpais/Handy/pull/1533)). Everything else in this fork by [LimaJoota](https://github.com/LimaJoota).
+[Handy](https://github.com/cjpais/Handy) by CJ Pais and contributors, MIT licensed. Word replacements by marko-kraemer ([#1533](https://github.com/cjpais/Handy/pull/1533)). Copy if Not Pasted is IaroslavMazur's idea ([#1379](https://github.com/cjpais/Handy/discussions/1379#discussioncomment-19421565)). Everything else in this fork by [LimaJoota](https://github.com/LimaJoota).
