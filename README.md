@@ -177,8 +177,6 @@ Real dictations on the final build: 14 in a row, median 0.91 s, worst 2.96 s, in
 
 **Tried, no benefit:** `GGML_METAL_NO_RESIDENCY`, `GGML_METAL_SHARED_BUFFERS_*` and thread QoS classes.
 
-Not in the `v0.10.0-lj.1` download yet: build `pessoal` from source to get it.
-
 ## Install
 
 1. Download `Handy-macOS-arm64.zip` from [Releases](https://github.com/LimaJoota/Handy/releases/latest) (Apple Silicon).
