@@ -36,6 +36,7 @@ Everything here stays local. Nothing is sent anywhere, and by default the clipbo
 | ⌥⇧H | **Last 5 transcripts on demand**, each with its own Copy                                          | Shortcut, rebindable in General   |
 | 📋  | **Last 5 transcripts in the menu bar**, one click to copy                                         | Handy's tray menu                 |
 | 🔐  | **No more stuck permissions after an update**: stale macOS grants are cleared before asking again | Onboarding                        |
+| ⚡  | **Faster under load**: one CPU thread on Metal, and an idle model warms up while you talk         | Automatic on macOS                |
 
 ## Design notes
 
@@ -154,6 +155,30 @@ flowchart LR
 
 This ports the approach of [#2057](https://github.com/cjpais/Handy/pull/2057) by notenderdreams, whose target file was replaced in 0.10, and adds the microphone.
 
+### ⚡ Speed on a busy Mac
+
+**The problem.** Idle, Parakeet v3 is instant. With other work running on the Mac, a short dictation could take 20 s. Two separate causes:
+
+- **Spinning threads.** GPU sessions default to 8 CPU threads that spin-wait between steps. On a busy CPU they fight everything else for cores, and the decoder ends up about 100× slower. A Metal session needs one.
+- **An evicted model.** Under memory pressure macOS evicts an idle model from the GPU, so the first run after a pause pays to bring it back.
+
+**The fix.** Metal sessions on macOS use one CPU thread. When recording starts on a model idle for 10 s or more, Handy decodes a second of silence in the background, then repeats every 15 s while you talk, so the model is ready when you stop. Streaming models skip this, since they decode from the first sample.
+
+| 10 s clip, Parakeet v3                  | Before   | After       |
+| --------------------------------------- | -------- | ----------- |
+| Idle                                    | 170 ms   | 172 ms      |
+| 10 normal-priority CPU jobs             | 992 ms   | 392 ms      |
+| 12 low-priority CPU jobs                | 2211 ms  | 320 ms      |
+| After a 45 s pause, 15 GB ML job on GPU | 2.2–20 s | 0.24–0.36 s |
+
+Real dictations on the final build: 14 in a row, median 0.91 s, worst 2.96 s, including 30.6 s of audio in 0.95 s. Those ran with little memory pressure, so the table is the stress case.
+
+**The cost.** Under that 15 GB load a warm-up takes 6–10 s, so a shorter dictation waits for the rest of it. Whisper Turbo and long audio didn't change.
+
+**Tried, no benefit:** `GGML_METAL_NO_RESIDENCY`, `GGML_METAL_SHARED_BUFFERS_*` and thread QoS classes.
+
+Not in the `v0.10.0-lj.1` download yet: build `pessoal` from source to get it.
+
 ## Install
 
 1. Download `Handy-macOS-arm64.zip` from [Releases](https://github.com/LimaJoota/Handy/releases/latest) (Apple Silicon).
@@ -178,8 +203,8 @@ Full platform notes are in [BUILD.md](BUILD.md).
 
 ## Engineering
 
-- **Branches, one feature each**, all on Handy 0.10.0: [`feat/accent-color`](https://github.com/LimaJoota/Handy/tree/feat/accent-color), [`feat/word-replacements`](https://github.com/LimaJoota/Handy/tree/feat/word-replacements), [`feat/paste-recovery`](https://github.com/LimaJoota/Handy/tree/feat/paste-recovery) (includes the tray list), [`feat/tray-recent-transcripts`](https://github.com/LimaJoota/Handy/tree/feat/tray-recent-transcripts), [`feat/copy-if-not-pasted`](https://github.com/LimaJoota/Handy/tree/feat/copy-if-not-pasted), [`fix/macos-stale-permissions`](https://github.com/LimaJoota/Handy/tree/fix/macos-stale-permissions). [`pessoal`](https://github.com/LimaJoota/Handy/tree/pessoal) is all of them together and is what the release is built from.
-- **Tests:** the full Rust suite passes (357 tests), including accent validation, settings salvage, replacement rules, lost-paste detection, tray labels and the history queries.
+- **Branches, one feature each**, all on Handy 0.10.0: [`feat/accent-color`](https://github.com/LimaJoota/Handy/tree/feat/accent-color), [`feat/word-replacements`](https://github.com/LimaJoota/Handy/tree/feat/word-replacements), [`feat/paste-recovery`](https://github.com/LimaJoota/Handy/tree/feat/paste-recovery) (includes the tray list), [`feat/tray-recent-transcripts`](https://github.com/LimaJoota/Handy/tree/feat/tray-recent-transcripts), [`feat/copy-if-not-pasted`](https://github.com/LimaJoota/Handy/tree/feat/copy-if-not-pasted), [`fix/macos-stale-permissions`](https://github.com/LimaJoota/Handy/tree/fix/macos-stale-permissions), [`perf/metal-single-thread`](https://github.com/LimaJoota/Handy/tree/perf/metal-single-thread), [`perf/warm-up-idle-model`](https://github.com/LimaJoota/Handy/tree/perf/warm-up-idle-model). [`pessoal`](https://github.com/LimaJoota/Handy/tree/pessoal) is all of them together and is what the release is built from.
+- **Tests:** the full Rust suite passes (358 tests), including accent validation, settings salvage, replacement rules, lost-paste detection, tray labels, the history queries and warm-up timing.
 - **Clean gates:** `tsc`, ESLint, Prettier, `cargo fmt` and the translation checker all pass.
 - **i18n:** every new string ships in all 26 locales Handy supports.
 - **Follows upstream patterns**: settings as typed Rust enums with salvage-on-load, Tauri commands mirrored in `bindings.ts`, events for cross-webview sync. Easy to rebase, easy to upstream piece by piece.
