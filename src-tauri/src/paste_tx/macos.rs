@@ -24,7 +24,7 @@ use objc2_foundation::{NSArray, NSInteger, NSObject, NSString};
 use tauri::{AppHandle, Manager};
 use tauri_plugin_clipboard_manager::ClipboardExt;
 
-use super::{evaluate, send_chord, TxState, WaitDecision};
+use super::{evaluate, keeps_transcript, send_chord, TxState, WaitDecision};
 use crate::clipboard::send_return_key;
 use crate::input::EnigoState;
 use crate::settings::{AutoSubmitKey, ClipboardHandling, PasteMethod};
@@ -101,11 +101,11 @@ struct MacPending {
     provider: Option<Retained<HandyPasteProvider>>,
     auto_submit: bool,
     auto_submit_key: AutoSubmitKey,
-    /// ClipboardHandling::CopyToClipboard — instead of restoring, settle by
-    /// re-writing the transcript as plain text (without the concealment
-    /// markers), so clipboard managers record it and it outlives the promise.
-    preserve_transcript: bool,
-    /// The transcript, for the `preserve_transcript` re-write at settle time.
+    /// When `keeps_transcript` says so, settle by re-writing the transcript as
+    /// plain text instead of restoring (without the concealment markers), so
+    /// clipboard managers record it and it outlives the promise.
+    clipboard_handling: ClipboardHandling,
+    /// The transcript, for that re-write at settle time.
     transcript: String,
     settled: bool,
 }
@@ -158,10 +158,10 @@ fn settle(
         !ownership_lost && NSPasteboard::generalPasteboard().changeCount() == p.change_count;
     if !still_ours {
         info!("[reliable-paste] clipboard changed externally; leaving it untouched");
-    } else if p.preserve_transcript {
-        // The user asked for the transcript to stay on the clipboard: replace
-        // the concealed promise with plain text so clipboard managers record
-        // it and it survives this app exiting.
+    } else if keeps_transcript(p.clipboard_handling, receipt_seen) {
+        // The transcript stays on the clipboard: replace the concealed promise
+        // with plain text so clipboard managers record it and it survives this
+        // app exiting.
         let _ = app_handle.clipboard().write_text(&p.transcript);
         info!("[reliable-paste] left transcript on clipboard as plain text");
     } else {
@@ -323,7 +323,7 @@ pub(super) fn run(
         provider: Some(provider),
         auto_submit,
         auto_submit_key,
-        preserve_transcript: clipboard_handling == ClipboardHandling::CopyToClipboard,
+        clipboard_handling,
         transcript: text.to_string(),
         settled: false,
     }));

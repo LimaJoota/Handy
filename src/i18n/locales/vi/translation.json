@@ -550,8 +550,10 @@
         "description": "Không sửa đổi Clipboard giữ nguyên nội dung clipboard hiện tại sau khi chuyển đổi. Sao chép vào Clipboard để lại kết quả chuyển đổi trong clipboard sau khi dán.",
         "options": {
           "dontModify": "Không sửa đổi Clipboard",
-          "copyToClipboard": "Sao chép vào Clipboard"
-        }
+          "copyToClipboard": "Sao chép vào Clipboard",
+          "copyIfNotPasted": "Sao chép nếu chưa dán"
+        },
+        "copyIfNotPastedDescription": "Giữ nguyên bộ nhớ tạm khi dán thành công. Nếu không ứng dụng nào đọc, bản ghi sẽ ở lại đó để bạn tự dán."
       },
       "autoSubmit": {
         "title": "Gửi tự động",

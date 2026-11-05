@@ -1065,6 +1065,7 @@ pub fn change_clipboard_handling_setting(app: AppHandle, handling: String) -> Re
     let parsed = match handling.as_str() {
         "dont_modify" => ClipboardHandling::DontModify,
         "copy_to_clipboard" => ClipboardHandling::CopyToClipboard,
+        "copy_if_not_pasted" => ClipboardHandling::CopyIfNotPasted,
         other => {
             warn!(
                 "Invalid clipboard handling '{}', defaulting to dont_modify",

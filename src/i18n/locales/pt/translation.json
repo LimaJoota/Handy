@@ -550,8 +550,10 @@
         "description": "Não Modificar Área de Transferência preserva o conteúdo atual da área de transferência após a transcrição. Copiar para Área de Transferência deixa o resultado da transcrição na área de transferência após colar.",
         "options": {
           "dontModify": "Não Modificar Área de Transferência",
-          "copyToClipboard": "Copiar para Área de Transferência"
-        }
+          "copyToClipboard": "Copiar para Área de Transferência",
+          "copyIfNotPasted": "Copiar se Não Colar"
+        },
+        "copyIfNotPastedDescription": "Mantém sua área de transferência quando a colagem dá certo. Se nenhum app ler o texto, a transcrição fica lá para você colar."
       },
       "autoSubmit": {
         "title": "Envio automático",

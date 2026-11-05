@@ -550,8 +550,10 @@
         "description": "Zwischenablage nicht ändern bewahrt den aktuellen Inhalt nach der Transkription. In Zwischenablage kopieren hinterlässt das Transkriptionsergebnis in der Zwischenablage.",
         "options": {
           "dontModify": "Zwischenablage nicht ändern",
-          "copyToClipboard": "In Zwischenablage kopieren"
-        }
+          "copyToClipboard": "In Zwischenablage kopieren",
+          "copyIfNotPasted": "Kopieren, wenn nicht eingefügt"
+        },
+        "copyIfNotPastedDescription": "Behält deine Zwischenablage, wenn das Einfügen klappt. Liest keine App den Text, bleibt die Transkription zum Einfügen dort."
       },
       "autoSubmit": {
         "title": "Automatisch absenden",

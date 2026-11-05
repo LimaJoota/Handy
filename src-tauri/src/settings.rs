@@ -191,6 +191,10 @@ pub enum ClipboardHandling {
     #[default]
     DontModify,
     CopyToClipboard,
+    /// Restore the clipboard when the paste lands; leave the transcript on it
+    /// when nothing read it, so it can be pasted by hand. Needs reliable paste:
+    /// without it there's no such signal and this acts like `DontModify`.
+    CopyIfNotPasted,
 }
 
 /// Script applied to Mandarin and Cantonese output. Traditional carries its region

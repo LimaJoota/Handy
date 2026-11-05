@@ -550,8 +550,10 @@
         "description": "No modificar portapapeles conserva el contenido actual de tu portapapeles después de la transcripción. Copiar al portapapeles deja el resultado de la transcripción en tu portapapeles después de pegar.",
         "options": {
           "dontModify": "No modificar portapapeles",
-          "copyToClipboard": "Copiar al portapapeles"
-        }
+          "copyToClipboard": "Copiar al portapapeles",
+          "copyIfNotPasted": "Copiar si no se pega"
+        },
+        "copyIfNotPastedDescription": "Conserva tu portapapeles si el pegado funciona. Si ninguna app lo lee, la transcripción queda ahí para que la pegues."
       },
       "autoSubmit": {
         "title": "Envío automático",

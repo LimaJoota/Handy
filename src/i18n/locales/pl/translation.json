@@ -550,8 +550,10 @@
         "description": "Nie modyfikuj schowka zachowuje jego zawartość. Kopiuj do schowka pozostawia wynik transkrypcji w schowku.",
         "options": {
           "dontModify": "Nie modyfikuj schowka",
-          "copyToClipboard": "Kopiuj do schowka"
-        }
+          "copyToClipboard": "Kopiuj do schowka",
+          "copyIfNotPasted": "Kopiuj, jeśli nie wklejono"
+        },
+        "copyIfNotPastedDescription": "Zachowuje schowek, gdy wklejenie się uda. Jeśli żadna aplikacja nie odczyta tekstu, transkrypcja zostaje w schowku do wklejenia."
       },
       "autoSubmit": {
         "title": "Automatyczne wysyłanie",

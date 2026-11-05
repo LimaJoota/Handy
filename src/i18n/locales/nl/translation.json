@@ -550,8 +550,10 @@
         "description": "'Klembord niet aanpassen' behoudt je huidige klembordinhoud na een transcriptie. 'Kopiëren naar klembord' laat de getranscribeerde tekst achter op je klembord.",
         "options": {
           "dontModify": "Klembord niet aanpassen",
-          "copyToClipboard": "Kopiëren naar klembord"
-        }
+          "copyToClipboard": "Kopiëren naar klembord",
+          "copyIfNotPasted": "Kopiëren als niet geplakt"
+        },
+        "copyIfNotPastedDescription": "Bewaart je klembord als het plakken lukt. Leest geen app de tekst, dan blijft de transcriptie staan om zelf te plakken."
       },
       "autoSubmit": {
         "title": "Automatisch verzenden",

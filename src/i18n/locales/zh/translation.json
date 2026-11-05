@@ -550,8 +550,10 @@
         "description": "不修改剪贴板将在转录后保留当前剪贴板内容。复制到剪贴板将在粘贴后将转录结果留在剪贴板中。",
         "options": {
           "dontModify": "不修改剪贴板",
-          "copyToClipboard": "复制到剪贴板"
-        }
+          "copyToClipboard": "复制到剪贴板",
+          "copyIfNotPasted": "未粘贴时复制"
+        },
+        "copyIfNotPastedDescription": "粘贴成功时保留剪贴板内容。如果没有应用读取，转录内容会留在剪贴板中，方便你手动粘贴。"
       },
       "autoSubmit": {
         "title": "自动提交",

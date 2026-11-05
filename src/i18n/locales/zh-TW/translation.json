@@ -550,8 +550,10 @@
         "description": "不修改剪貼簿將在轉錄後保留目前剪貼簿內容。複製到剪貼簿會在貼上後將轉錄結果留在剪貼簿中",
         "options": {
           "dontModify": "不修改剪貼簿",
-          "copyToClipboard": "複製到剪貼簿"
-        }
+          "copyToClipboard": "複製到剪貼簿",
+          "copyIfNotPasted": "未貼上時複製"
+        },
+        "copyIfNotPastedDescription": "貼上成功時保留剪貼簿內容。如果沒有應用程式讀取，轉錄內容會留在剪貼簿中，方便你手動貼上。"
       },
       "autoSubmit": {
         "title": "自動送出",

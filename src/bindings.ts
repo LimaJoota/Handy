@@ -1205,7 +1205,13 @@ export type ChineseScript =
  * Traditional, in Hong Kong's standard forms.
  */
 "traditional_hk"
-export type ClipboardHandling = "dont_modify" | "copy_to_clipboard"
+export type ClipboardHandling = "dont_modify" | "copy_to_clipboard" | 
+/**
+ * Restore the clipboard when the paste lands; leave the transcript on it
+ * when nothing read it, so it can be pasted by hand. Needs reliable paste:
+ * without it there's no such signal and this acts like `DontModify`.
+ */
+"copy_if_not_pasted"
 export type CustomSounds = { start: boolean; stop: boolean }
 export type GpuDeviceOption = { id: string; name: string; total_vram_mb: number }
 export type HistoryEntry = { id: number; file_name: string; timestamp: number; saved: boolean; title: string; transcription_text: string; post_processed_text: string | null; post_process_prompt: string | null; post_process_requested: boolean; 

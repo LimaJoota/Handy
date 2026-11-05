@@ -550,8 +550,10 @@
         "description": "Ne pas modifier le presse-papiers préserve le contenu actuel de votre presse-papiers après la transcription. Copier dans le presse-papiers laisse le résultat de la transcription dans votre presse-papiers après le collage.",
         "options": {
           "dontModify": "Ne pas modifier le presse-papiers",
-          "copyToClipboard": "Copier dans le presse-papiers"
-        }
+          "copyToClipboard": "Copier dans le presse-papiers",
+          "copyIfNotPasted": "Copier si non collé"
+        },
+        "copyIfNotPastedDescription": "Conserve votre presse-papiers si le collage réussit. Si aucune app ne le lit, la transcription y reste pour que vous la colliez."
       },
       "autoSubmit": {
         "title": "Envoi automatique",

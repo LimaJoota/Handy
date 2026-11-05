@@ -550,8 +550,10 @@
         "description": "Jangan Ubah Papan Klip akan mempertahankan isi papan klip saat ini setelah transkripsi. Salin ke Papan Klip akan membiarkan hasil transkripsi tetap berada di papan klip setelah ditempel.",
         "options": {
           "dontModify": "Jangan Ubah Papan Klip",
-          "copyToClipboard": "Salin ke Papan Klip"
-        }
+          "copyToClipboard": "Salin ke Papan Klip",
+          "copyIfNotPasted": "Salin jika tidak tertempel"
+        },
+        "copyIfNotPastedDescription": "Mempertahankan papan klip saat penempelan berhasil. Jika tidak ada aplikasi yang membacanya, transkrip tetap di sana untuk Anda tempel."
       },
       "autoSubmit": {
         "title": "Kirim Otomatis",
