@@ -548,6 +548,8 @@ impl ShortcutAction for TranscribeAction {
         };
         if live_decode(expected_model, settings.long_form_chunking) != LiveDecode::None {
             tm.start_stream();
+        } else {
+            tm.warm_up_if_idle();
         }
         let plan_elapsed = plan_started.elapsed();
 

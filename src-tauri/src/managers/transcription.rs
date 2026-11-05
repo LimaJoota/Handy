@@ -43,6 +43,10 @@ pub mod policy;
 pub use job::ChunkControl;
 
 const STREAM_PERF_LOG_INTERVAL: Duration = Duration::from_secs(5);
+/// A second of silence at 16 kHz: every layer runs, whatever the length.
+const WARM_UP_SAMPLES: usize = 16_000;
+/// A model used more recently than this hasn't had time to leave memory.
+const WARM_UP_AFTER_IDLE_MS: u64 = 10_000;
 
 pub(crate) fn panic_payload_message(payload: &(dyn std::any::Any + Send)) -> String {
     if let Some(message) = payload.downcast_ref::<&str>() {
@@ -1054,6 +1058,37 @@ impl TranscriptionManager {
         self.transcribe_cpp(mark, batch, audio)
     }
 
+    /// Brings a model that sat idle back into memory while the user is still
+    /// speaking. Under memory pressure macOS pages out an idle model within a
+    /// minute, and the next transcription pays seconds to read it back.
+    pub fn warm_up_if_idle(&self) {
+        let Some(info) = self.engine.loaded() else {
+            return;
+        };
+        let idle_ms = Self::now_ms().saturating_sub(self.last_activity.load(Ordering::Relaxed));
+        if !should_warm_up(info.on_gpu, idle_ms) {
+            return;
+        }
+        let this = self.clone();
+        thread::spawn(move || {
+            let started = Instant::now();
+            match this.warm_up() {
+                Ok(()) => debug!("Warmed up the idle model in {:?}", started.elapsed()),
+                Err(e) => debug!("Model warm-up stopped: {}", e),
+            }
+        });
+    }
+
+    /// Decodes silence and drops the text. The transcription queues behind it.
+    fn warm_up(&self) -> Result<()> {
+        let audio = vec![0.0; WARM_UP_SAMPLES];
+        let mark = self.engine.cancel_mark();
+        let batch = self.batch_context(&audio)?;
+        self.run_batch(mark, audio, &batch.setup.run_options, &batch.active_model)
+            .map_err(engine_error)?;
+        Ok(())
+    }
+
     /// Waits out any model load, then reads what a batch transcription of
     /// `audio` runs with: the loaded model, the settings, and the language
     /// resolved for it.
@@ -1517,6 +1552,12 @@ impl StreamPerf {
     fn compute_secs(&self) -> f64 {
         self.stream_compute_elapsed.as_secs_f64()
     }
+}
+
+/// Only on a Mac's GPU, where it was measured and a warm-up takes tens of
+/// milliseconds. On a CPU it could take long enough to hold up a short dictation.
+fn should_warm_up(on_gpu: bool, idle_ms: u64) -> bool {
+    cfg!(target_os = "macos") && on_gpu && idle_ms >= WARM_UP_AFTER_IDLE_MS
 }
 
 fn real_time_factor(audio_secs: f64, compute_secs: f64) -> f64 {
@@ -1986,6 +2027,16 @@ mod tests {
 
     fn languages(codes: &[&str]) -> Vec<String> {
         codes.iter().map(|code| (*code).to_string()).collect()
+    }
+
+    #[test]
+    fn warm_up_needs_an_idle_model_on_the_gpu() {
+        assert!(!should_warm_up(true, WARM_UP_AFTER_IDLE_MS - 1));
+        assert!(!should_warm_up(false, WARM_UP_AFTER_IDLE_MS));
+        assert_eq!(
+            should_warm_up(true, WARM_UP_AFTER_IDLE_MS),
+            cfg!(target_os = "macos")
+        );
     }
 
     #[test]
