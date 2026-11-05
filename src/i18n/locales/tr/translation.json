@@ -555,8 +555,10 @@
         "description": "Panoyu Değiştirme, transkripsiyon sonrası mevcut pano içeriğini korur. Panoya Kopyala ise yapıştırma işleminden sonra transkripsiyon sonucunu panoda bırakır.",
         "options": {
           "dontModify": "Panoyu Değiştirme",
-          "copyToClipboard": "Panoya Kopyala"
-        }
+          "copyToClipboard": "Panoya Kopyala",
+          "copyIfNotPasted": "Yapıştırılmazsa kopyala"
+        },
+        "copyIfNotPastedDescription": "Yapıştırma başarılı olursa panonu korur. Hiçbir uygulama okumazsa döküm, senin yapıştırman için panoda kalır."
       },
       "autoSubmit": {
         "title": "Otomatik Gönder",

@@ -15,6 +15,9 @@ export const ClipboardHandlingSetting: React.FC<ClipboardHandlingProps> =
     const { t } = useTranslation();
     const { getSetting, updateSetting, isUpdating } = useSettings();
 
+    const selectedHandling = (getSetting("clipboard_handling") ||
+      "dont_modify") as ClipboardHandling;
+
     const clipboardHandlingOptions = [
       {
         value: "dont_modify",
@@ -24,10 +27,22 @@ export const ClipboardHandlingSetting: React.FC<ClipboardHandlingProps> =
         value: "copy_to_clipboard",
         label: t("settings.advanced.clipboardHandling.options.copyToClipboard"),
       },
+      // Telling a missed paste from one that landed takes reliable paste.
+      ...(getSetting("reliable_paste") ||
+      selectedHandling === "copy_if_not_pasted"
+        ? [
+            {
+              value: "copy_if_not_pasted",
+              label: t(
+                "settings.advanced.clipboardHandling.options.copyIfNotPasted",
+              ),
+              description: t(
+                "settings.advanced.clipboardHandling.copyIfNotPastedDescription",
+              ),
+            },
+          ]
+        : []),
     ];
-
-    const selectedHandling = (getSetting("clipboard_handling") ||
-      "dont_modify") as ClipboardHandling;
 
     return (
       <SettingContainer

@@ -26,7 +26,7 @@ use windows::Win32::Foundation::{
     SetLastError, ERROR_SUCCESS, HANDLE, HGLOBAL, HINSTANCE, HWND, LPARAM, LRESULT, WPARAM,
 };
 
-use super::{evaluate, paste_looks_lost, send_chord, TxState, WaitDecision};
+use super::{evaluate, keeps_transcript, paste_looks_lost, send_chord, TxState, WaitDecision};
 use crate::clipboard::send_return_key;
 use crate::input::EnigoState;
 use crate::settings::{AutoSubmitKey, ClipboardHandling, PasteMethod};
@@ -74,9 +74,9 @@ pub(super) struct WinTxShared {
     app_handle: tauri::AppHandle,
     auto_submit: bool,
     auto_submit_key: AutoSubmitKey,
-    /// ClipboardHandling::CopyToClipboard — settle by leaving the transcript
-    /// on the clipboard as plain text instead of restoring the snapshot.
-    preserve_transcript: bool,
+    /// When `keeps_transcript` says so, settle by leaving the transcript on
+    /// the clipboard as plain text instead of restoring the snapshot.
+    clipboard_handling: ClipboardHandling,
     /// Set once the transcript has been offered back for a lost paste.
     recovery_offered: AtomicBool,
 }
@@ -243,11 +243,16 @@ fn flush_pending() {
 }
 
 /// Settle-time clipboard handling once we know we still own the clipboard:
-/// restore the snapshot, or — for ClipboardHandling::CopyToClipboard — replace
-/// the concealed promise with plain transcript text, so clipboard history and
+/// restore the snapshot, or — when `keeps_transcript` says so — replace the
+/// concealed promise with plain transcript text, so clipboard history and
 /// managers record it and it survives this transaction's window going away.
 unsafe fn settle_clipboard(shared: &WinTxShared) {
-    if !shared.preserve_transcript {
+    let receipt_seen = shared
+        .state
+        .lock()
+        .map(|st| st.any_receipt_after_injection())
+        .unwrap_or(true);
+    if !keeps_transcript(shared.clipboard_handling, receipt_seen) {
         restore_snapshot(shared);
         return;
     }
@@ -601,7 +606,7 @@ pub(super) fn run(
         app_handle: app_handle.clone(),
         auto_submit,
         auto_submit_key,
-        preserve_transcript: clipboard_handling == ClipboardHandling::CopyToClipboard,
+        clipboard_handling,
         recovery_offered: AtomicBool::new(false),
     });
 

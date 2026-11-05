@@ -555,8 +555,10 @@
         "description": "«No modifiqueu el porta-retalls» conserva el contingut actual del porta-retalls després de la transcripció. «Copieu al porta-retalls» hi deixa el resultat de la transcripció després d'enganxar-lo.",
         "options": {
           "dontModify": "No modifiqueu el porta-retalls",
-          "copyToClipboard": "Copia al porta-retalls"
-        }
+          "copyToClipboard": "Copia al porta-retalls",
+          "copyIfNotPasted": "Copia si no s'enganxa"
+        },
+        "copyIfNotPastedDescription": "Conserva el porta-retalls si l'enganxat funciona. Si cap app no el llegeix, la transcripció s'hi queda perquè l'enganxis."
       },
       "autoSubmit": {
         "title": "Enviament automàtic",

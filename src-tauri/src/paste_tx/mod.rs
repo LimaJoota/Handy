@@ -35,6 +35,7 @@
 // tests), but only the macOS/Windows platform modules consume all of it.
 #![cfg_attr(not(any(target_os = "macos", target_os = "windows")), allow(dead_code))]
 
+use crate::settings::ClipboardHandling;
 use std::time::{Duration, Instant};
 
 #[cfg(target_os = "macos")]
@@ -144,6 +145,18 @@ pub(crate) fn paste_looks_lost(state: &TxState, now: Instant) -> bool {
         || state
             .injected_at
             .is_some_and(|injected| now.duration_since(injected) >= RECOVERY_DELAY)
+}
+
+/// Whether a settling paste leaves the transcript on the clipboard instead of
+/// restoring what was there. A missing read is strong evidence the paste
+/// missed; a read is weaker evidence it landed, and getting that wrong only
+/// costs today's behavior, a restored clipboard.
+pub(crate) fn keeps_transcript(handling: ClipboardHandling, receipt_seen: bool) -> bool {
+    match handling {
+        ClipboardHandling::DontModify => false,
+        ClipboardHandling::CopyToClipboard => true,
+        ClipboardHandling::CopyIfNotPasted => !receipt_seen,
+    }
 }
 
 pub(crate) enum WaitDecision {
@@ -318,6 +331,26 @@ mod tests {
 
         s.ownership_lost = true;
         assert!(!paste_looks_lost(&s, Instant::now()));
+    }
+
+    #[test]
+    fn copy_if_not_pasted_keeps_the_transcript_only_without_a_read() {
+        assert!(keeps_transcript(ClipboardHandling::CopyIfNotPasted, false));
+        assert!(!keeps_transcript(ClipboardHandling::CopyIfNotPasted, true));
+    }
+
+    #[test]
+    fn other_clipboard_handling_ignores_the_read() {
+        for receipt_seen in [false, true] {
+            assert!(!keeps_transcript(
+                ClipboardHandling::DontModify,
+                receipt_seen
+            ));
+            assert!(keeps_transcript(
+                ClipboardHandling::CopyToClipboard,
+                receipt_seen
+            ));
+        }
     }
 
     #[test]

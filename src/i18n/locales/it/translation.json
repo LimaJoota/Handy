@@ -555,8 +555,10 @@
         "description": "Non Modificare gli Appunti mantiene il contenuto dei tuoi appunti dopo la trascrizione. Copia negli Appunti lascia il risultato della trascrizione negli appunti dopo aver incollato.",
         "options": {
           "dontModify": "Non Modificare gli Appunti",
-          "copyToClipboard": "Copia negli Appunti"
-        }
+          "copyToClipboard": "Copia negli Appunti",
+          "copyIfNotPasted": "Copia se non incollato"
+        },
+        "copyIfNotPastedDescription": "Mantiene i tuoi appunti se l'incolla riesce. Se nessuna app legge il testo, la trascrizione resta lì per incollarla tu."
       },
       "autoSubmit": {
         "title": "Invio automatico",

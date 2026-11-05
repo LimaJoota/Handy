@@ -555,8 +555,10 @@
         "description": "Ändra inte urklipp bevarar ditt nuvarande urklippsinnehåll efter transkription. Kopiera till urklipp lämnar transkriptionsresultatet i ditt urklipp efter att ha klistrat in.",
         "options": {
           "dontModify": "Ändra inte urklipp",
-          "copyToClipboard": "Kopiera till urklipp"
-        }
+          "copyToClipboard": "Kopiera till urklipp",
+          "copyIfNotPasted": "Kopiera om inte inklistrat"
+        },
+        "copyIfNotPastedDescription": "Behåller ditt urklipp när inklistringen lyckas. Om ingen app läser texten ligger transkriptionen kvar så att du kan klistra in den."
       },
       "autoSubmit": {
         "title": "Skicka automatiskt",

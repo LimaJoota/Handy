@@ -555,8 +555,10 @@
         "description": "'Neměnit schránku' zachová po přepisu aktuální obsah schránky. 'Kopírovat do schránky' ponechá po vložení výsledek přepisu ve schránce.",
         "options": {
           "dontModify": "Neměnit schránku",
-          "copyToClipboard": "Kopírovat do schránky"
-        }
+          "copyToClipboard": "Kopírovat do schránky",
+          "copyIfNotPasted": "Kopírovat, pokud se nevložilo"
+        },
+        "copyIfNotPastedDescription": "Zachová schránku, když se vložení povede. Když text žádná aplikace nepřečte, přepis ve schránce zůstane, abyste ho mohli vložit."
       },
       "autoSubmit": {
         "title": "Automatické odeslání",

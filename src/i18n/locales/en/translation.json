@@ -555,8 +555,10 @@
         "description": "Don't Modify Clipboard preserves your current clipboard contents after transcription. Copy to Clipboard leaves the transcription result in your clipboard after pasting.",
         "options": {
           "dontModify": "Don't Modify Clipboard",
-          "copyToClipboard": "Copy to Clipboard"
-        }
+          "copyToClipboard": "Copy to Clipboard",
+          "copyIfNotPasted": "Copy if Not Pasted"
+        },
+        "copyIfNotPastedDescription": "Keeps your clipboard when the paste lands. If no app reads it, the transcript stays there for you to paste."
       },
       "autoSubmit": {
         "title": "Auto Submit",
