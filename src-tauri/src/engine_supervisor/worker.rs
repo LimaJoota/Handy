@@ -16,7 +16,7 @@ use std::path::Path;
 use std::sync::mpsc;
 use std::thread;
 use transcribe_cpp::{
-    Backend, BackendMask, DeviceType, Feature, Model, ModelOptions, Session, Stream,
+    Backend, BackendMask, DeviceType, Feature, Model, ModelOptions, Session, SessionOptions, Stream,
 };
 
 /// Prefix on worker log lines so the parent can tell them apart from raw
@@ -292,18 +292,22 @@ fn load(
     inject_fault("load", backend != Backend::Cpu);
     let model = Model::load_with(path, &ModelOptions { backend, device })
         .map_err(|e| format!("Failed to load model: {e}"))?;
-    let session = model
-        .session()
-        .map_err(|e| format!("Failed to create session: {e}"))?;
     let bound = model.device().ok().map(|d| DeviceInfo::from_device(&d));
     let backend_name = model.backend();
+    let on_gpu = match &bound {
+        Some(device) => device.is_gpu(),
+        None => !backend_name.is_empty() && !backend_name.eq_ignore_ascii_case("cpu"),
+    };
+    let session = model
+        .session_with(&SessionOptions {
+            n_threads: session_threads(on_gpu),
+            ..Default::default()
+        })
+        .map_err(|e| format!("Failed to create session: {e}"))?;
     let info = LoadedInfo {
         arch: model.arch(),
         variant: model.variant(),
-        on_gpu: match &bound {
-            Some(device) => device.is_gpu(),
-            None => !backend_name.is_empty() && !backend_name.eq_ignore_ascii_case("cpu"),
-        },
+        on_gpu,
         backend: backend_name,
         device: bound
             .as_ref()
@@ -317,6 +321,19 @@ fn load(
         supports_vocabulary: model.supports(Feature::Vocabulary),
     };
     Ok((session, info))
+}
+
+/// CPU threads for a session; 0 is the library's default of up to 8. On Metal
+/// only small decoder graphs stay on the CPU, and spin-waiting threads make
+/// those far slower when anything else wants the CPU: 10 s of Parakeet audio
+/// took 2.2 s with the default and 0.32 s with one thread on a busy M4, and
+/// the same on an idle one.
+fn session_threads(on_gpu: bool) -> i32 {
+    if on_gpu && cfg!(target_os = "macos") {
+        1
+    } else {
+        0
+    }
 }
 
 /// Debug-build fault injection for exercising crash/hang recovery:
