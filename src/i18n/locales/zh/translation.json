@@ -353,6 +353,10 @@
           "show_last_transcript": {
             "name": "显示上次转录",
             "description": "显示上次的转录内容和复制按钮，点击之前不会改动剪贴板。"
+          },
+          "paste_last_transcript": {
+            "name": "粘贴上次转录",
+            "description": "再次粘贴上次的转录内容,用于粘贴到了错误窗口的情况。"
           }
         },
         "errors": {

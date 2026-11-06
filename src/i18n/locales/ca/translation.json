@@ -353,6 +353,10 @@
           "show_last_transcript": {
             "name": "Mostra l'última transcripció",
             "description": "Mostra l'última transcripció amb un botó Copia, sense tocar el porta-retalls fins que hi facis clic."
+          },
+          "paste_last_transcript": {
+            "name": "Enganxa l'última transcripció",
+            "description": "Torna a enganxar l'última transcripció, per quan ha anat a parar a la finestra equivocada."
           }
         },
         "errors": {

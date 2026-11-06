@@ -353,6 +353,10 @@
           "show_last_transcript": {
             "name": "Mostra ultima trascrizione",
             "description": "Mostra l'ultima trascrizione con un pulsante Copia, senza toccare gli appunti finché non fai clic."
+          },
+          "paste_last_transcript": {
+            "name": "Incolla ultima trascrizione",
+            "description": "Incolla di nuovo l'ultima trascrizione, se è finita nella finestra sbagliata."
           }
         },
         "errors": {

@@ -353,6 +353,10 @@
           "show_last_transcript": {
             "name": "Mostrar última transcripción",
             "description": "Muestra tu última transcripción con un botón Copiar, sin tocar el portapapeles hasta que hagas clic."
+          },
+          "paste_last_transcript": {
+            "name": "Pegar última transcripción",
+            "description": "Vuelve a pegar tu última transcripción, por si fue a parar a la ventana equivocada."
           }
         },
         "errors": {

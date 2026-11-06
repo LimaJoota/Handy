@@ -353,6 +353,10 @@
           "show_last_transcript": {
             "name": "Visa senaste transkription",
             "description": "Visar din senaste transkription med en Kopiera-knapp, utan att röra urklipp förrän du klickar."
+          },
+          "paste_last_transcript": {
+            "name": "Klistra in senaste transkription",
+            "description": "Klistrar in din senaste transkription igen, om den hamnade i fel fönster."
           }
         },
         "errors": {

@@ -353,6 +353,10 @@
           "show_last_transcript": {
             "name": "Son dökümü göster",
             "description": "Son dökümünü bir Kopyala düğmesiyle gösterir; sen tıklayana kadar panoya dokunmaz."
+          },
+          "paste_last_transcript": {
+            "name": "Son dökümü yapıştır",
+            "description": "Yanlış pencereye gittiğinde son dökümünüzü yeniden yapıştırır."
           }
         },
         "errors": {
