@@ -6,7 +6,7 @@
 
 [Download for macOS](https://github.com/LimaJoota/Handy/releases/latest) · [What changed](#what-changed) · [Design notes](#design-notes) · [Build](#build-from-source) · [Upstream README](https://github.com/cjpais/Handy#readme)
 
-<img src="docs/fork/settings-purple.jpg" width="560" alt="Handy settings with the purple accent">
+<img src="docs/fork/settings.png" width="620" alt="Handy settings following the macOS accent color">
 
 </div>
 
@@ -44,7 +44,7 @@ Everything here stays local. Nothing is sent anywhere, and by default the clipbo
 
 **What.** One setting next to Theme: Pink (the brand default), System, Purple, or Custom with a color picker. It recolors buttons, switches, highlights, the wordmark and the recording overlay, in light and dark.
 
-<p align="center"><img src="docs/fork/accent-picker.jpg" width="620" alt="Accent Color setting with Pink, System, Purple and Custom"></p>
+<p align="center"><img src="docs/fork/accent.png" width="620" alt="Accent Color set to System, recoloring the logo, buttons and switches"></p>
 
 **How.** Handy's palette already flows from three source tokens in [`theme.css`](src/styles/theme.css): a light pastel, a dark pastel and a strong shade for filled controls. Every other color is a `color-mix()` of those. So the feature doesn't touch a single component: it sets `data-accent` on the document root and overrides only those three tokens.
 
