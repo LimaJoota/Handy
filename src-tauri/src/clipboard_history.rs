@@ -37,7 +37,7 @@ const MAX_KEEP: usize = 1000;
 const MENU_GROUP: usize = 10;
 /// Time for the menu to close and focus to settle before pasting.
 #[cfg(target_os = "macos")]
-const PICK_SETTLE: Duration = Duration::from_millis(120);
+const PICK_SETTLE: Duration = Duration::from_millis(250);
 /// How many copies the tray menu lists.
 pub const TRAY_ITEMS: usize = 10;
 /// Longer copies (a whole file, a log dump) aren't kept.
@@ -565,7 +565,10 @@ mod macos {
     fn build_and_pop_up(copies: &[Copied], locale: String) -> muda::Result<()> {
         use muda::accelerator::{Accelerator, Code};
         use muda::{ContextMenu, Menu, MenuItem, PredefinedMenuItem, Submenu};
-        use objc2_app_kit::{NSEvent, NSMenu};
+        use objc2::MainThreadMarker;
+        use objc2_app_kit::{
+            NSApplication, NSApplicationActivationOptions, NSEvent, NSMenu, NSWorkspace,
+        };
 
         const KEYS: [Code; MENU_GROUP] = [
             Code::Digit1,
@@ -619,8 +622,19 @@ mod macos {
         // SAFETY: muda hands out its live NSMenu, kept alive by `menu` for the
         // whole (blocking) popup; this runs on the main thread.
         let ns_menu = unsafe { &*(menu.ns_menu() as *const NSMenu) };
+        // A menu from an app in the background doesn't get the keyboard: the
+        // number keys would type into the app in front. Handy steps forward
+        // for the menu and gives focus back as it closes, before the paste.
+        let previous = NSWorkspace::sharedWorkspace().frontmostApplication();
+        if let Some(mtm) = MainThreadMarker::new() {
+            #[allow(deprecated)]
+            NSApplication::sharedApplication(mtm).activateIgnoringOtherApps(true);
+        }
         let location = NSEvent::mouseLocation();
         ns_menu.popUpMenuPositioningItem_atLocation_inView(None, location, None);
+        if let Some(previous) = previous {
+            previous.activateWithOptions(NSApplicationActivationOptions::empty());
+        }
         Ok(())
     }
 
