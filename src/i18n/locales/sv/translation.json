@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Klistra in senaste transkription",
             "description": "Klistrar in din senaste transkription igen, om den hamnade i fel fönster."
+          },
+          "show_clipboard_history": {
+            "name": "Visa urklippshistorik",
+            "description": "Öppnar det du kopierat vid muspekaren. Tryck 1–9 för att klistra in det objektet."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Urklippshistorik",
         "description": "Sparar det du kopierar, krypterat, och visar det i menyraden, nyast först. Dikteringar hoppas över. Att stänga av raderar historiken."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Storlek på urklippshistorik",
+        "description": "Hur många kopior som sparas. Menyn visar de första 10, resten i grupper om 10."
       },
       "autoSubmit": {
         "title": "Skicka automatiskt",

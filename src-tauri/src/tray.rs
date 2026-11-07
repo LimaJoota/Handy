@@ -930,7 +930,7 @@ fn recent_transcript_label(entry: &HistoryEntry) -> String {
 }
 
 /// `HH:MM  first words…` of `text`, saved at `timestamp` (Unix seconds).
-fn menu_label(text: &str, timestamp: i64) -> String {
+pub(crate) fn menu_label(text: &str, timestamp: i64) -> String {
     let text = text.split_whitespace().collect::<Vec<_>>().join(" ");
     let mut preview: String = text.chars().take(RECENT_LABEL_CHARS).collect();
     if text.chars().count() > RECENT_LABEL_CHARS {

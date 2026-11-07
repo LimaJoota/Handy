@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "粘贴上次转录",
             "description": "再次粘贴上次的转录内容,用于粘贴到了错误窗口的情况。"
+          },
+          "show_clipboard_history": {
+            "name": "显示剪贴板历史",
+            "description": "在鼠标指针处打开你复制的内容。按 1 到 9 粘贴对应项目。"
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "剪贴板历史",
         "description": "加密保存你复制的内容，并按从新到旧显示在菜单栏中。听写内容会被跳过。关闭后历史记录将被清除。"
+      },
+      "clipboardHistoryLimit": {
+        "title": "剪贴板历史数量",
+        "description": "要保留的复制条数。菜单显示前 10 条，其余每 10 条一组。"
       },
       "autoSubmit": {
         "title": "自动提交",

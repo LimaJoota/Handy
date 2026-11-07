@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Colar última transcrição",
             "description": "Cola de novo sua última transcrição, para quando ela foi parar na janela errada."
+          },
+          "show_clipboard_history": {
+            "name": "Mostrar histórico da Área de Transferência",
+            "description": "Abre o que você copiou onde está o mouse. Aperte de 1 a 9 para colar aquele item."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Histórico da Área de Transferência",
         "description": "Guarda o que você copia, criptografado, e lista na barra de menus, do mais recente ao mais antigo. Ditados ficam de fora. Desligar apaga o histórico."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Tamanho do histórico da Área de Transferência",
+        "description": "Quantos itens copiados guardar. O menu mostra os 10 primeiros e o resto em grupos de 10."
       },
       "autoSubmit": {
         "title": "Envio automático",

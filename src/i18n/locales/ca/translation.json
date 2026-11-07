@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Enganxa l'última transcripció",
             "description": "Torna a enganxar l'última transcripció, per quan ha anat a parar a la finestra equivocada."
+          },
+          "show_clipboard_history": {
+            "name": "Mostra l'historial del porta-retalls",
+            "description": "Obre el que has copiat al punter del ratolí. Prem de l'1 al 9 per enganxar aquell element."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Historial del porta-retalls",
         "description": "Desa xifrat el que copies i ho mostra a la barra de menús, del més recent al més antic. S'ometen els dictats. Desactivar-lo esborra l'historial."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Mida de l'historial del porta-retalls",
+        "description": "Quantes còpies es guarden. El menú mostra les 10 primeres i la resta en grups de 10."
       },
       "autoSubmit": {
         "title": "Enviament automàtic",

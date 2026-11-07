@@ -530,6 +530,9 @@ pub struct AppSettings {
     /// by default: the copies are kept on disk.
     #[serde(default)]
     pub clipboard_history: bool,
+    /// How many copies the clipboard history keeps.
+    #[serde(default = "default_clipboard_history_limit")]
+    pub clipboard_history_limit: usize,
     #[serde(default = "default_app_language")]
     pub app_language: String,
     #[serde(default = "default_theme")]
@@ -716,6 +719,10 @@ fn default_paste_delay_after_ms() -> u64 {
 
 fn default_auto_submit() -> bool {
     false
+}
+
+fn default_clipboard_history_limit() -> usize {
+    50
 }
 
 fn default_history_limit() -> usize {
@@ -1071,6 +1078,17 @@ pub fn get_default_settings() -> AppSettings {
             current_binding: default_paste_last_transcript_shortcut.to_string(),
         },
     );
+    #[cfg(target_os = "macos")]
+    bindings.insert(
+        "show_clipboard_history".to_string(),
+        ShortcutBinding {
+            id: "show_clipboard_history".to_string(),
+            name: "Show Clipboard History".to_string(),
+            description: "Opens the clipboard history at the mouse pointer.".to_string(),
+            default_binding: "command+shift+v".to_string(),
+            current_binding: "command+shift+v".to_string(),
+        },
+    );
 
     AppSettings {
         settings_schema_version: default_settings_schema_version(),
@@ -1118,6 +1136,7 @@ pub fn get_default_settings() -> AppSettings {
         mute_while_recording: false,
         append_trailing_space: false,
         clipboard_history: false,
+        clipboard_history_limit: default_clipboard_history_limit(),
         app_language: default_app_language(),
         theme: default_theme(),
         accent_color: default_accent_color(),

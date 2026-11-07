@@ -12,6 +12,7 @@ import { PasteMethodSetting } from "../PasteMethod";
 import { TypingToolSetting } from "../TypingTool";
 import { ClipboardHandlingSetting } from "../ClipboardHandling";
 import { ClipboardHistory } from "../ClipboardHistory";
+import { ClipboardHistoryLimit } from "../ClipboardHistoryLimit";
 import { type } from "@tauri-apps/plugin-os";
 import { AutoSubmit } from "../AutoSubmit";
 import { PostProcessingToggle } from "../PostProcessingToggle";
@@ -52,6 +53,9 @@ export const AdvancedSettings: React.FC = () => {
         <ClipboardHandlingSetting descriptionMode="tooltip" grouped={true} />
         {type() === "macos" && (
           <ClipboardHistory descriptionMode="tooltip" grouped={true} />
+        )}
+        {type() === "macos" && getSetting("clipboard_history") && (
+          <ClipboardHistoryLimit descriptionMode="tooltip" grouped={true} />
         )}
         <AutoSubmit descriptionMode="tooltip" grouped={true} />
       </SettingsGroup>

@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Paste Last Transcript",
             "description": "Pastes your last transcript again, for when it landed in the wrong window."
+          },
+          "show_clipboard_history": {
+            "name": "Show Clipboard History",
+            "description": "Opens what you copied at the mouse pointer. Press 1 to 9 to paste that item."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Clipboard History",
         "description": "Keeps what you copy, encrypted, and lists it in the menu bar, newest first. Dictations are left out. Turning it off erases it."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Clipboard History Size",
+        "description": "How many copies to keep. The menu lists the first 10, the rest in groups of 10."
       },
       "autoSubmit": {
         "title": "Auto Submit",

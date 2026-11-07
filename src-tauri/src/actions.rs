@@ -1084,6 +1084,17 @@ fn paste_last_transcript(app: &AppHandle) {
     }
 }
 
+/// Opens the clipboard history at the pointer, Clipy style.
+struct ShowClipboardHistoryAction;
+
+impl ShortcutAction for ShowClipboardHistoryAction {
+    fn start(&self, app: &AppHandle, _binding_id: &str, _shortcut_str: &str) {
+        crate::clipboard_history::show_menu(app);
+    }
+
+    fn stop(&self, _app: &AppHandle, _binding_id: &str, _shortcut_str: &str) {}
+}
+
 struct TestAction;
 
 impl ShortcutAction for TestAction {
@@ -1130,6 +1141,10 @@ pub static ACTION_MAP: Lazy<HashMap<String, Arc<dyn ShortcutAction>>> = Lazy::ne
     map.insert(
         "paste_last_transcript".to_string(),
         Arc::new(PasteLastTranscriptAction) as Arc<dyn ShortcutAction>,
+    );
+    map.insert(
+        "show_clipboard_history".to_string(),
+        Arc::new(ShowClipboardHistoryAction) as Arc<dyn ShortcutAction>,
     );
     map.insert(
         "test".to_string(),

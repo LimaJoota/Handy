@@ -33,6 +33,9 @@ export const GeneralSettings: React.FC = () => {
         {!isLinux && <ShortcutInput shortcutId="cancel" grouped={true} />}
         <ShortcutInput shortcutId="show_last_transcript" grouped={true} />
         <ShortcutInput shortcutId="paste_last_transcript" grouped={true} />
+        {type() === "macos" && (
+          <ShortcutInput shortcutId="show_clipboard_history" grouped={true} />
+        )}
       </SettingsGroup>
       <SettingsGroup title={t("settings.languages.title")}>
         <PreferredLanguages descriptionMode="tooltip" grouped={true} />

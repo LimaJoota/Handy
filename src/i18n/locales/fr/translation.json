@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Coller la dernière transcription",
             "description": "Colle à nouveau votre dernière transcription, si elle a atterri dans la mauvaise fenêtre."
+          },
+          "show_clipboard_history": {
+            "name": "Afficher l'historique du presse-papiers",
+            "description": "Ouvre ce que vous avez copié sous le pointeur. Appuyez de 1 à 9 pour coller cet élément."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Historique du presse-papiers",
         "description": "Conserve, chiffré, ce que vous copiez et l'affiche dans la barre des menus, du plus récent au plus ancien. Les dictées sont ignorées. Le désactiver efface l'historique."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Taille de l'historique du presse-papiers",
+        "description": "Nombre de copies à conserver. Le menu affiche les 10 premières, le reste par groupes de 10."
       },
       "autoSubmit": {
         "title": "Envoi automatique",

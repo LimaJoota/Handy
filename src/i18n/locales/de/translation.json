@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Letzte Transkription einfügen",
             "description": "Fügt deine letzte Transkription erneut ein, falls sie im falschen Fenster gelandet ist."
+          },
+          "show_clipboard_history": {
+            "name": "Zwischenablage-Verlauf anzeigen",
+            "description": "Öffnet das Kopierte am Mauszeiger. Drücken Sie 1 bis 9, um diesen Eintrag einzufügen."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Zwischenablage-Verlauf",
         "description": "Speichert verschlüsselt, was Sie kopieren, und zeigt es in der Menüleiste an, das Neueste zuerst. Diktate werden übersprungen. Beim Ausschalten wird der Verlauf gelöscht."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Größe des Zwischenablage-Verlaufs",
+        "description": "Wie viele Kopien gespeichert werden. Das Menü zeigt die ersten 10, den Rest in Zehnergruppen."
       },
       "autoSubmit": {
         "title": "Automatisch absenden",

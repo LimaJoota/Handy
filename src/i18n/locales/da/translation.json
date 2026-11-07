@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Indsæt seneste transskription",
             "description": "Indsætter din seneste transskription igen, hvis den endte i det forkerte vindue."
+          },
+          "show_clipboard_history": {
+            "name": "Vis udklipsholderhistorik",
+            "description": "Åbner det, du har kopieret, ved musemarkøren. Tryk 1–9 for at indsætte det element."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Udklipsholderhistorik",
         "description": "Gemmer det, du kopierer, krypteret, og viser det i menulinjen, nyeste først. Dikteringer springes over. Når den slås fra, slettes historikken."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Størrelse på udklipsholderhistorik",
+        "description": "Hvor mange kopier der gemmes. Menuen viser de første 10, resten i grupper på 10."
       },
       "autoSubmit": {
         "title": "Automatisk indsendelse",

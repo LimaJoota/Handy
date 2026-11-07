@@ -817,6 +817,17 @@ fn should_send_auto_submit(auto_submit: bool, paste_method: PasteMethod) -> bool
     auto_submit && paste_method != PasteMethod::None
 }
 
+/// Puts `text` on the clipboard, where it stays, and pastes it: an item picked
+/// from the clipboard history. Unlike [`paste`], no trailing space and no
+/// restore. Call from a worker thread.
+pub fn paste_from_history(text: &str, app_handle: &AppHandle) -> Result<(), String> {
+    let _paste = PASTE_LOCK.lock().unwrap_or_else(PoisonError::into_inner);
+    let paste_delay_ms = get_settings(app_handle).paste_delay_ms;
+    write_text_to_clipboard(app_handle, text)?;
+    std::thread::sleep(Duration::from_millis(paste_delay_ms));
+    with_enigo(app_handle, |enigo| input::send_paste_ctrl_v(enigo, 100))
+}
+
 /// Pastes `text` into the focused app. Call from a worker thread, never the main
 /// thread: it sleeps between steps (input injection hops via `with_enigo`).
 pub fn paste(text: String, app_handle: AppHandle) -> Result<(), String> {

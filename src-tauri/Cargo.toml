@@ -162,6 +162,9 @@ transcribe-cpp = { version = "0.4.0", default-features = false }
 [target.'cfg(target_os = "macos")'.dependencies]
 # Keychain item holding the clipboard history key.
 security-framework = "3"
+# The clipboard history menu at the pointer; the same muda Tauri uses, so its
+# clicks reach the app's menu events.
+muda = { version = "0.19", default-features = false }
 tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel", branch = "v2.1" }
 # Used by the receipt-sequenced ("reliable") paste path for lazy NSPasteboard
 # promises. Versions track what Tauri already pulls in.

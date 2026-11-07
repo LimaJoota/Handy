@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Pegar última transcripción",
             "description": "Vuelve a pegar tu última transcripción, por si fue a parar a la ventana equivocada."
+          },
+          "show_clipboard_history": {
+            "name": "Mostrar historial del portapapeles",
+            "description": "Abre lo que copiaste junto al puntero. Pulsa del 1 al 9 para pegar ese elemento."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Historial del portapapeles",
         "description": "Guarda lo que copias, cifrado, y lo muestra en la barra de menús, del más reciente al más antiguo. Omite los dictados. Al desactivarlo se borra el historial."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Tamaño del historial del portapapeles",
+        "description": "Cuántas copias guardar. El menú muestra las 10 primeras y el resto en grupos de 10."
       },
       "autoSubmit": {
         "title": "Envío automático",

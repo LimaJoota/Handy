@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Incolla ultima trascrizione",
             "description": "Incolla di nuovo l'ultima trascrizione, se è finita nella finestra sbagliata."
+          },
+          "show_clipboard_history": {
+            "name": "Mostra cronologia Appunti",
+            "description": "Apre ciò che hai copiato sotto il puntatore. Premi da 1 a 9 per incollare quell'elemento."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Cronologia Appunti",
         "description": "Conserva ciò che copi, cifrato, e lo elenca nella barra dei menu, dal più recente. Le dettature vengono ignorate. Disattivarla cancella la cronologia."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Dimensione cronologia Appunti",
+        "description": "Quante copie conservare. Il menu mostra le prime 10, le altre in gruppi da 10."
       },
       "autoSubmit": {
         "title": "Invio automatico",

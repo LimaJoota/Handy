@@ -30,8 +30,14 @@ use tauri::{AppHandle, Manager};
 
 use crate::managers::history::HistoryManager;
 
-/// How many copies are kept; older ones are dropped.
-const KEEP: usize = 50;
+/// Most copies the history may keep, whatever the setting says.
+const MAX_KEEP: usize = 1000;
+/// Copies listed directly in the pointer menu, with keys 1–9 and 0; the rest
+/// go in submenus of the same size.
+const MENU_GROUP: usize = 10;
+/// Time for the menu to close and focus to settle before pasting.
+#[cfg(target_os = "macos")]
+const PICK_SETTLE: Duration = Duration::from_millis(120);
 /// How many copies the tray menu lists.
 pub const TRAY_ITEMS: usize = 10;
 /// Longer copies (a whole file, a log dump) aren't kept.
@@ -148,6 +154,66 @@ pub fn recent(app: &AppHandle, limit: usize) -> Vec<Copied> {
     }
 }
 
+/// How many copies to keep, from the setting.
+fn keep(app: &AppHandle) -> usize {
+    crate::settings::get_settings(app)
+        .clipboard_history_limit
+        .clamp(1, MAX_KEEP)
+}
+
+/// Opens the history at the pointer. Picking a copy (or pressing its number)
+/// pastes it into the app in front.
+pub fn show_menu(app: &AppHandle) {
+    if !ENABLED.load(Ordering::Relaxed) {
+        return;
+    }
+    #[cfg(target_os = "macos")]
+    {
+        let copies = recent(app, keep(app));
+        let locale = crate::settings::get_settings(app).app_language;
+        if let Err(err) = app.run_on_main_thread(move || macos::pop_up(&copies, locale)) {
+            error!("Failed to open the clipboard history menu: {err}");
+        }
+    }
+}
+
+/// Pastes the copy picked in the pointer menu.
+pub fn paste_item(app: &AppHandle, id: i64) {
+    let app = app.clone();
+    std::thread::spawn(move || {
+        let Some(text) = get(&app, id) else {
+            error!("Clipboard history item {id} is gone");
+            return;
+        };
+        #[cfg(target_os = "macos")]
+        std::thread::sleep(PICK_SETTLE);
+        if let Err(err) = crate::clipboard::paste_from_history(&text, &app) {
+            error!("Failed to paste a clipboard history item: {err}");
+        }
+    });
+}
+
+/// One copy by id.
+fn get(app: &AppHandle, id: i64) -> Option<String> {
+    let (vault, path) = (VAULT.get()?, db_path(app)?);
+    let conn = open(&path).ok()?;
+    let data: Vec<u8> = conn
+        .query_row("SELECT data FROM clips WHERE id = ?1", [id], |row| {
+            row.get(0)
+        })
+        .ok()?;
+    vault.open(&data)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_clipboard_history_limit_setting(app: AppHandle, limit: usize) -> Result<(), String> {
+    let mut settings = crate::settings::get_settings(&app);
+    settings.clipboard_history_limit = limit.clamp(1, MAX_KEEP);
+    crate::settings::write_settings(&app, settings);
+    Ok(())
+}
+
 /// Forgets every copy and refreshes the tray.
 pub fn clear(app: &AppHandle) {
     if let Some(path) = db_path(app) {
@@ -186,7 +252,7 @@ fn remember(app: &AppHandle, text: &str) {
         return;
     };
     let now = chrono::Utc::now().timestamp();
-    match open(&path).and_then(|conn| add(&conn, vault, text, now)) {
+    match open(&path).and_then(|conn| add(&conn, vault, text, now, keep(app))) {
         Ok(()) => {
             debug!("Kept a clipboard copy ({} chars).", text.chars().count());
             crate::tray::update_tray_menu(app);
@@ -386,9 +452,15 @@ fn init(conn: &Connection) -> rusqlite::Result<()> {
 }
 
 /// Adds `text` as the newest copy, encrypted. Copying it again moves it to the
-/// top, and only the newest [`KEEP`] stay.
+/// top, and only the newest `keep` stay.
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
-fn add(conn: &Connection, vault: &Vault, text: &str, now: i64) -> rusqlite::Result<()> {
+fn add(
+    conn: &Connection,
+    vault: &Vault,
+    text: &str,
+    now: i64,
+    keep: usize,
+) -> rusqlite::Result<()> {
     let Some(data) = vault.seal(text) else {
         error!("Failed to encrypt a clipboard copy");
         return Ok(());
@@ -401,7 +473,7 @@ fn add(conn: &Connection, vault: &Vault, text: &str, now: i64) -> rusqlite::Resu
     )?;
     conn.execute(
         "DELETE FROM clips WHERE id NOT IN (SELECT id FROM clips ORDER BY id DESC LIMIT ?1)",
-        [KEEP as i64],
+        [keep as i64],
     )?;
     Ok(())
 }
@@ -479,6 +551,77 @@ mod macos {
                 remember(&app, &text);
             }
         }
+    }
+
+    /// Shows the history as a native menu at the pointer: the newest
+    /// [`MENU_GROUP`] with keys 1–9 and 0, older ones in submenus. AppKit runs
+    /// the menu until it closes; the pick arrives as a menu event.
+    pub(super) fn pop_up(copies: &[Copied], locale: String) {
+        if let Err(err) = build_and_pop_up(copies, locale) {
+            error!("Failed to show the clipboard history menu: {err}");
+        }
+    }
+
+    fn build_and_pop_up(copies: &[Copied], locale: String) -> muda::Result<()> {
+        use muda::accelerator::{Accelerator, Code};
+        use muda::{ContextMenu, Menu, MenuItem, PredefinedMenuItem, Submenu};
+        use objc2_app_kit::{NSEvent, NSMenu};
+
+        const KEYS: [Code; MENU_GROUP] = [
+            Code::Digit1,
+            Code::Digit2,
+            Code::Digit3,
+            Code::Digit4,
+            Code::Digit5,
+            Code::Digit6,
+            Code::Digit7,
+            Code::Digit8,
+            Code::Digit9,
+            Code::Digit0,
+        ];
+        let strings = crate::tray_i18n::get_tray_translations(Some(locale));
+        let item = |copy: &Copied, key: Option<Code>| {
+            MenuItem::with_id(
+                format!("paste_copied:{}", copy.id),
+                crate::tray::menu_label(&shown(&copy.text), copy.copied_at),
+                true,
+                key.map(|code| Accelerator::new(None, code)),
+            )
+        };
+
+        let menu = Menu::new();
+        menu.append(&MenuItem::with_id(
+            "copied_recently",
+            &strings.copied_recently,
+            false,
+            None,
+        ))?;
+        let (first, rest) = copies.split_at(copies.len().min(MENU_GROUP));
+        for (copy, key) in first.iter().zip(KEYS) {
+            menu.append(&item(copy, Some(key)))?;
+        }
+        for (group, chunk) in rest.chunks(MENU_GROUP).enumerate() {
+            let start = MENU_GROUP * (group + 1) + 1;
+            let submenu = Submenu::new(format!("{start}–{}", start + chunk.len() - 1), true);
+            for copy in chunk {
+                submenu.append(&item(copy, None))?;
+            }
+            menu.append(&submenu)?;
+        }
+        menu.append(&PredefinedMenuItem::separator())?;
+        menu.append(&MenuItem::with_id(
+            "clear_copied",
+            &strings.clear_copied,
+            !copies.is_empty(),
+            None,
+        ))?;
+
+        // SAFETY: muda hands out its live NSMenu, kept alive by `menu` for the
+        // whole (blocking) popup; this runs on the main thread.
+        let ns_menu = unsafe { &*(menu.ns_menu() as *const NSMenu) };
+        let location = NSEvent::mouseLocation();
+        ns_menu.popUpMenuPositioningItem_atLocation_inView(None, location, None);
+        Ok(())
     }
 
     /// Gets the key from the Keychain, creating it on first use. A new key
@@ -566,6 +709,8 @@ mod macos {
 mod tests {
     use super::*;
 
+    const KEEP: usize = 50;
+
     #[test]
     fn keys_and_tokens_are_secret() {
         for text in [
@@ -626,7 +771,7 @@ mod tests {
     fn copies_are_stored_encrypted() {
         let conn = Connection::open_in_memory().unwrap();
         init(&conn).unwrap();
-        add(&conn, &vault(), "my secret password", 1).unwrap();
+        add(&conn, &vault(), "my secret password", 1, KEEP).unwrap();
         let data: Vec<u8> = conn
             .query_row("SELECT data FROM clips", [], |row| row.get(0))
             .unwrap();
@@ -664,9 +809,9 @@ mod tests {
         let conn = Connection::open_in_memory().unwrap();
         init(&conn).unwrap();
         let v = vault();
-        add(&conn, &v, "first", 1).unwrap();
-        add(&conn, &v, "second", 2).unwrap();
-        add(&conn, &v, "first", 3).unwrap();
+        add(&conn, &v, "first", 1, KEEP).unwrap();
+        add(&conn, &v, "second", 2, KEEP).unwrap();
+        add(&conn, &v, "first", 3, KEEP).unwrap();
         let texts: Vec<String> = recent_from(&conn, &v, 10)
             .unwrap()
             .into_iter()
@@ -675,7 +820,7 @@ mod tests {
         assert_eq!(texts, ["first", "second"]);
 
         for n in 0..KEEP + 5 {
-            add(&conn, &v, &format!("copy {n}"), 10 + n as i64).unwrap();
+            add(&conn, &v, &format!("copy {n}"), 10 + n as i64, KEEP).unwrap();
         }
         let all = recent_from(&conn, &v, KEEP * 2).unwrap();
         assert_eq!(all.len(), KEEP);

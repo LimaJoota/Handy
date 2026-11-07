@@ -320,6 +320,11 @@ fn initialize_core_logic(app_handle: &AppHandle) {
                     tray::copy_copied_item(app, id);
                 }
             }
+            id if id.starts_with("paste_copied:") => {
+                if let Ok(id) = id["paste_copied:".len()..].parse() {
+                    clipboard_history::paste_item(app, id);
+                }
+            }
             "clear_copied" => {
                 clipboard_history::clear(app);
             }
@@ -748,6 +753,7 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_mute_while_recording_setting,
             shortcut::change_append_trailing_space_setting,
             clipboard_history::change_clipboard_history_setting,
+            clipboard_history::change_clipboard_history_limit_setting,
             shortcut::change_lazy_stream_close_setting,
             shortcut::change_vad_enabled_setting,
             shortcut::change_long_form_chunking_setting,

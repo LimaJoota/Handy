@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Son dökümü yapıştır",
             "description": "Yanlış pencereye gittiğinde son dökümünüzü yeniden yapıştırır."
+          },
+          "show_clipboard_history": {
+            "name": "Pano Geçmişini Göster",
+            "description": "Kopyaladıklarınızı fare imlecinin olduğu yerde açar. O öğeyi yapıştırmak için 1–9'a basın."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Pano Geçmişi",
         "description": "Kopyaladıklarınızı şifreli olarak saklar ve menü çubuğunda en yeniden eskiye listeler. Dikteler atlanır. Kapatmak geçmişi siler."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Pano Geçmişi Boyutu",
+        "description": "Kaç kopya saklanacağı. Menü ilk 10'u, kalanları 10'luk gruplar halinde gösterir."
       },
       "autoSubmit": {
         "title": "Otomatik Gönder",

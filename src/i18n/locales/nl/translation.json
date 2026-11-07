@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Laatste transcriptie plakken",
             "description": "Plakt je laatste transcriptie opnieuw, als die in het verkeerde venster terechtkwam."
+          },
+          "show_clipboard_history": {
+            "name": "Klembordgeschiedenis tonen",
+            "description": "Opent wat je hebt gekopieerd bij de muisaanwijzer. Druk op 1 tot 9 om dat item te plakken."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Klembordgeschiedenis",
         "description": "Bewaart wat je kopieert, versleuteld, en toont het in de menubalk, nieuwste eerst. Dictaten worden overgeslagen. Uitzetten wist de geschiedenis."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Grootte van klembordgeschiedenis",
+        "description": "Hoeveel kopieën bewaard blijven. Het menu toont de eerste 10, de rest in groepen van 10."
       },
       "autoSubmit": {
         "title": "Automatisch verzenden",

@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Dán bản ghi cuối",
             "description": "Dán lại bản ghi cuối của bạn khi nó vào nhầm cửa sổ."
+          },
+          "show_clipboard_history": {
+            "name": "Hiện lịch sử Clipboard",
+            "description": "Mở những gì bạn đã sao chép tại con trỏ chuột. Nhấn 1–9 để dán mục đó."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Lịch sử Clipboard",
         "description": "Lưu những gì bạn sao chép ở dạng mã hóa và liệt kê trên thanh menu, mới nhất trước. Nội dung đọc chính tả được bỏ qua. Tắt sẽ xóa lịch sử."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Kích thước lịch sử Clipboard",
+        "description": "Số bản sao được giữ lại. Menu hiện 10 mục đầu, phần còn lại theo nhóm 10."
       },
       "autoSubmit": {
         "title": "Gửi tự động",

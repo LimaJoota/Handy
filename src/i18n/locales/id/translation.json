@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Tempel transkrip terakhir",
             "description": "Menempelkan kembali transkrip terakhir Anda, jika masuk ke jendela yang salah."
+          },
+          "show_clipboard_history": {
+            "name": "Tampilkan Riwayat Papan Klip",
+            "description": "Membuka yang Anda salin di posisi penunjuk tetikus. Tekan 1–9 untuk menempelkan item itu."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Riwayat Papan Klip",
         "description": "Menyimpan yang Anda salin dalam bentuk terenkripsi dan menampilkannya di bilah menu, terbaru lebih dulu. Dikte dilewati. Mematikannya menghapus riwayat."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Ukuran Riwayat Papan Klip",
+        "description": "Berapa salinan yang disimpan. Menu menampilkan 10 pertama, sisanya dalam kelompok 10."
       },
       "autoSubmit": {
         "title": "Kirim Otomatis",

@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Wklej ostatnią transkrypcję",
             "description": "Wkleja ponownie ostatnią transkrypcję, gdy trafiła do złego okna."
+          },
+          "show_clipboard_history": {
+            "name": "Pokaż historię schowka",
+            "description": "Otwiera to, co skopiowano, przy wskaźniku myszy. Naciśnij 1–9, aby wkleić ten element."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Historia schowka",
         "description": "Zapamiętuje to, co kopiujesz, w postaci zaszyfrowanej i pokazuje na pasku menu, od najnowszych. Dyktowania są pomijane. Wyłączenie usuwa historię."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Rozmiar historii schowka",
+        "description": "Ile kopii przechowywać. Menu pokazuje pierwsze 10, resztę w grupach po 10."
       },
       "autoSubmit": {
         "title": "Automatyczne wysyłanie",

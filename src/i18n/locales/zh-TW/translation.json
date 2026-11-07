@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "貼上上次轉錄",
             "description": "再次貼上上次的轉錄內容,用於貼到錯誤視窗的情況。"
+          },
+          "show_clipboard_history": {
+            "name": "顯示剪貼簿記錄",
+            "description": "在滑鼠指標處開啟你複製的內容。按 1 到 9 貼上對應項目。"
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "剪貼簿記錄",
         "description": "加密保存你複製的內容，並依新到舊顯示在選單列中。聽寫內容會被略過。關閉後記錄將被清除。"
+      },
+      "clipboardHistoryLimit": {
+        "title": "剪貼簿記錄數量",
+        "description": "要保留的複製筆數。選單顯示前 10 筆，其餘每 10 筆一組。"
       },
       "autoSubmit": {
         "title": "自動送出",

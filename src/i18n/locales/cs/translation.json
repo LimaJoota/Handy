@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "Vložit poslední přepis",
             "description": "Znovu vloží váš poslední přepis, když skončil ve špatném okně."
+          },
+          "show_clipboard_history": {
+            "name": "Zobrazit historii schránky",
+            "description": "Otevře zkopírované u ukazatele myši. Stiskem 1–9 vložíte danou položku."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "Historie schránky",
         "description": "Uchovává zašifrovaně, co zkopírujete, a zobrazuje to v řádku nabídek od nejnovějšího. Diktování se přeskakuje. Vypnutím se historie smaže."
+      },
+      "clipboardHistoryLimit": {
+        "title": "Velikost historie schránky",
+        "description": "Kolik kopií uchovat. Nabídka ukáže prvních 10, zbytek ve skupinách po 10."
       },
       "autoSubmit": {
         "title": "Automatické odeslání",

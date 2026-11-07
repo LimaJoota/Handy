@@ -359,6 +359,10 @@
           "paste_last_transcript": {
             "name": "마지막 받아쓰기 붙여넣기",
             "description": "잘못된 창에 들어갔을 때 마지막 받아쓰기를 다시 붙여넣습니다."
+          },
+          "show_clipboard_history": {
+            "name": "클립보드 기록 보기",
+            "description": "복사한 내용을 마우스 포인터 위치에 엽니다. 1~9를 누르면 해당 항목을 붙여넣습니다."
           }
         },
         "errors": {
@@ -569,6 +573,10 @@
       "clipboardHistory": {
         "label": "클립보드 기록",
         "description": "복사한 내용을 암호화해 저장하고 메뉴 막대에 최신순으로 표시합니다. 받아쓰기는 제외됩니다. 끄면 기록이 삭제됩니다."
+      },
+      "clipboardHistoryLimit": {
+        "title": "클립보드 기록 크기",
+        "description": "보관할 복사 항목 수입니다. 메뉴에는 처음 10개가, 나머지는 10개씩 묶여 표시됩니다."
       },
       "autoSubmit": {
         "title": "자동 제출",
