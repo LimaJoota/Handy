@@ -34,6 +34,7 @@ Everything here stays local. Nothing is sent anywhere, and by default the clipbo
 | 🛟  | **Paste recovery**: if the target app never reads the paste, the overlay offers the text back     | Automatic, with reliable paste on |
 | 📎  | **Copy if Not Pasted**: the transcript stays on the clipboard only when the paste missed          | Advanced → Clipboard Handling     |
 | ⌥⇧H | **Last 5 transcripts on demand**, each with its own Copy                                          | Shortcut, rebindable in General   |
+| ⌥⇧V | **Paste the last transcript again** into the active window, clipboard untouched              | Shortcut, rebindable in General   |
 | 📋  | **Last 5 transcripts in the menu bar**, one click to copy                                         | Handy's tray menu                 |
 | 🔐  | **No more stuck permissions after an update**: stale macOS grants are cleared before asking again | Onboarding                        |
 | ⚡  | **Faster under load**: one CPU thread on Metal, and an idle model warms up while you talk         | Automatic on macOS                |
@@ -128,9 +129,11 @@ flowchart LR
 
 **Copy if Not Pasted**, [IaroslavMazur's idea](https://github.com/cjpais/Handy/discussions/1379#discussioncomment-19421565). Same signal, opposite trade-off: no click needed, at the cost of the clipboard when a paste misses. Read means restore the previous clipboard, no read means leave the transcript there. Off by default, and offered only with reliable paste on, since the legacy path has no such signal.
 
-### ⌥⇧H and the menu bar: the manual ways back
+### ⌥⇧H, ⌥⇧V and the menu bar: the manual ways back
 
 **⌥⇧H** opens the same card with your last five transcripts, newest first, each with its own Copy. When a paste just failed, that one goes first under "Não colou?" ("Didn't paste?").
+
+**⌥⇧V** pastes the last transcript again into whatever window is active, for when it landed in the wrong one. It runs on key release, so the held Option and Shift never reach the paste, and the clipboard is restored afterwards. [xenotropic's request](https://github.com/cjpais/Handy/discussions/1379#discussioncomment-19427616).
 
 **The menu bar** lists the last five transcripts right in Handy's tray menu as `HH:MM  first words…`; click one and the full text is copied.
 
@@ -201,8 +204,8 @@ Full platform notes are in [BUILD.md](BUILD.md).
 
 ## Engineering
 
-- **Branches, one feature each**, all on Handy 0.10.0: [`feat/accent-color`](https://github.com/LimaJoota/Handy/tree/feat/accent-color), [`feat/word-replacements`](https://github.com/LimaJoota/Handy/tree/feat/word-replacements), [`feat/paste-recovery`](https://github.com/LimaJoota/Handy/tree/feat/paste-recovery) (includes the tray list), [`feat/tray-recent-transcripts`](https://github.com/LimaJoota/Handy/tree/feat/tray-recent-transcripts), [`feat/copy-if-not-pasted`](https://github.com/LimaJoota/Handy/tree/feat/copy-if-not-pasted), [`fix/macos-stale-permissions`](https://github.com/LimaJoota/Handy/tree/fix/macos-stale-permissions), [`perf/metal-single-thread`](https://github.com/LimaJoota/Handy/tree/perf/metal-single-thread), [`perf/warm-up-idle-model`](https://github.com/LimaJoota/Handy/tree/perf/warm-up-idle-model). [`pessoal`](https://github.com/LimaJoota/Handy/tree/pessoal) is all of them together and is what the release is built from.
-- **Tests:** the full Rust suite passes (358 tests), including accent validation, settings salvage, replacement rules, lost-paste detection, tray labels, the history queries and warm-up timing.
+- **Branches, one feature each**, all on Handy 0.10.0: [`feat/accent-color`](https://github.com/LimaJoota/Handy/tree/feat/accent-color), [`feat/word-replacements`](https://github.com/LimaJoota/Handy/tree/feat/word-replacements), [`feat/paste-recovery`](https://github.com/LimaJoota/Handy/tree/feat/paste-recovery), [`feat/paste-last-transcript`](https://github.com/LimaJoota/Handy/tree/feat/paste-last-transcript) (includes the tray list), [`feat/tray-recent-transcripts`](https://github.com/LimaJoota/Handy/tree/feat/tray-recent-transcripts), [`feat/copy-if-not-pasted`](https://github.com/LimaJoota/Handy/tree/feat/copy-if-not-pasted), [`fix/macos-stale-permissions`](https://github.com/LimaJoota/Handy/tree/fix/macos-stale-permissions), [`perf/metal-single-thread`](https://github.com/LimaJoota/Handy/tree/perf/metal-single-thread), [`perf/warm-up-idle-model`](https://github.com/LimaJoota/Handy/tree/perf/warm-up-idle-model). [`pessoal`](https://github.com/LimaJoota/Handy/tree/pessoal) is all of them together and is what the release is built from.
+- **Tests:** the full Rust suite passes (359 tests), including accent validation, settings salvage, replacement rules, lost-paste detection, tray labels, the history queries and warm-up timing.
 - **Clean gates:** `tsc`, ESLint, Prettier, `cargo fmt` and the translation checker all pass.
 - **i18n:** every new string ships in all 26 locales Handy supports.
 - **Follows upstream patterns**: settings as typed Rust enums with salvage-on-load, Tauri commands mirrored in `bindings.ts`, events for cross-webview sync. Easy to rebase, easy to upstream piece by piece.
