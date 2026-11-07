@@ -99,7 +99,7 @@ Choosing a model that punctuates natively beat every bolt-on: better output, ten
 
 **Why fuzzy wasn't enough.** Custom Words matches with Levenshtein distance plus a Soundex boost. "randy" vs "handy" is distance 1 in 5 letters (0.2), above the 0.07 threshold I run. And Soundex doesn't help, because the first letter differs (`R530` vs `H530`). Raising the threshold to the 0.18 default fixes Randy and breaks Portuguese instead: "mas" became "MAX", "hoje" became "hook".
 
-<p align="center"><img src="docs/fork/word-replacements.jpg" width="560" alt="Word Replacements setting with a Randy to Handy rule"></p>
+<p align="center"><img src="docs/fork/word-replacements.png" width="620" alt="Word Replacements setting with a Randy to Handy rule"></p>
 
 **How.** An exact, deterministic rule list: whole-word, case-insensitive, `from → to`. Replacement text is literal (`regex::NoExpand`, so `$` can't be read as a capture group), and an empty target deletes the term. It runs inside the transcription pipeline's fail-open transform: after custom words, before filler-word removal, so a bug in the rules can never cost you the transcript.
 
