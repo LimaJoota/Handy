@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Historia schowka",
-        "description": "Zapamiętuje to, co kopiujesz, i pokazuje na pasku menu, od najnowszych. Hasła, klucze i dyktowania są pomijane. Wyłączenie usuwa historię."
+        "description": "Zapamiętuje to, co kopiujesz, w postaci zaszyfrowanej i pokazuje na pasku menu, od najnowszych. Dyktowania są pomijane. Wyłączenie usuwa historię."
       },
       "autoSubmit": {
         "title": "Automatyczne wysyłanie",

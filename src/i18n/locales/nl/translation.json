@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Klembordgeschiedenis",
-        "description": "Bewaart wat je kopieert en toont het in de menubalk, nieuwste eerst. Wachtwoorden, sleutels en dictaten worden overgeslagen. Uitzetten wist de geschiedenis."
+        "description": "Bewaart wat je kopieert, versleuteld, en toont het in de menubalk, nieuwste eerst. Dictaten worden overgeslagen. Uitzetten wist de geschiedenis."
       },
       "autoSubmit": {
         "title": "Automatisch verzenden",

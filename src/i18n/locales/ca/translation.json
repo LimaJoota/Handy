@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Historial del porta-retalls",
-        "description": "Desa el que copies i ho mostra a la barra de menús, del més recent al més antic. S'ometen contrasenyes, claus i dictats. Desactivar-lo esborra l'historial."
+        "description": "Desa xifrat el que copies i ho mostra a la barra de menús, del més recent al més antic. S'ometen els dictats. Desactivar-lo esborra l'historial."
       },
       "autoSubmit": {
         "title": "Enviament automàtic",

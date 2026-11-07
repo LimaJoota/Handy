@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Pano Geçmişi",
-        "description": "Kopyaladıklarınızı saklar ve menü çubuğunda en yeniden eskiye listeler. Parolalar, anahtarlar ve dikteler atlanır. Kapatmak geçmişi siler."
+        "description": "Kopyaladıklarınızı şifreli olarak saklar ve menü çubuğunda en yeniden eskiye listeler. Dikteler atlanır. Kapatmak geçmişi siler."
       },
       "autoSubmit": {
         "title": "Otomatik Gönder",

@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Histórico da Área de Transferência",
-        "description": "Guarda o que você copia e lista na barra de menus, do mais recente ao mais antigo. Senhas, chaves e ditados ficam de fora. Desligar apaga o histórico."
+        "description": "Guarda o que você copia, criptografado, e lista na barra de menus, do mais recente ao mais antigo. Ditados ficam de fora. Desligar apaga o histórico."
       },
       "autoSubmit": {
         "title": "Envio automático",

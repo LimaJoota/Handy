@@ -4,19 +4,27 @@
 //! macOS posts no notification when the pasteboard changes, so a worker polls
 //! `changeCount` and reads the pasteboard only when it moved. Copies live in
 //! their own `clipboard.db`, apart from the transcript history and its
-//! migrations, readable only by the user, and never leave the machine.
+//! migrations, and never leave the machine.
 //!
-//! Never kept: what a password manager or Handy's own paste marks as
-//! concealed or transient, text that looks like a key, token or password, and
-//! dictations, which the tray already lists.
+//! Passwords and keys are kept like anything else (copying a few and pasting
+//! them is the point), so every copy is encrypted with AES-256-GCM under a key
+//! held in the login Keychain; the file alone reveals nothing. The menu shows
+//! only the start of what looks like a secret.
+//!
+//! Never kept: Handy's own dictations, which the tray already lists, and what
+//! an app marks as transient or auto-generated.
 
+use std::borrow::Cow;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 #[cfg(target_os = "macos")]
 use std::time::Duration;
 
 use log::{debug, error, info};
+use ring::aead::{Aad, LessSafeKey, Nonce, UnboundKey, AES_256_GCM, NONCE_LEN};
+use ring::hmac;
+use ring::rand::{SecureRandom, SystemRandom};
 use rusqlite::{params, Connection};
 use tauri::{AppHandle, Manager};
 
@@ -34,6 +42,67 @@ const RECENT_DICTATIONS: usize = 5;
 /// Mirrors the `clipboard_history` setting, so the worker doesn't read the
 /// settings store twice a second.
 static ENABLED: AtomicBool = AtomicBool::new(false);
+/// Set once the Keychain hands over the key; nothing is read or saved before.
+static VAULT: OnceLock<Vault> = OnceLock::new();
+/// Visible characters of a copy that looks like a secret, in the menu.
+const SECRET_SHOWN: usize = 3;
+
+/// Encrypts copies and fingerprints them, so a repeated copy can be found
+/// without storing its text.
+struct Vault {
+    seal: LessSafeKey,
+    mac: hmac::Key,
+}
+
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+impl Vault {
+    /// Key bytes as stored in the Keychain: 32 for AES-256-GCM, 32 for HMAC.
+    const KEY_LEN: usize = 64;
+
+    fn from_bytes(bytes: &[u8]) -> Option<Self> {
+        if bytes.len() != Self::KEY_LEN {
+            return None;
+        }
+        let seal = LessSafeKey::new(UnboundKey::new(&AES_256_GCM, &bytes[..32]).ok()?);
+        let mac = hmac::Key::new(hmac::HMAC_SHA256, &bytes[32..]);
+        Some(Self { seal, mac })
+    }
+
+    /// `nonce || ciphertext || tag`.
+    fn seal(&self, text: &str) -> Option<Vec<u8>> {
+        let mut nonce = [0u8; NONCE_LEN];
+        SystemRandom::new().fill(&mut nonce).ok()?;
+        let mut sealed = text.as_bytes().to_vec();
+        self.seal
+            .seal_in_place_append_tag(
+                Nonce::assume_unique_for_key(nonce),
+                Aad::empty(),
+                &mut sealed,
+            )
+            .ok()?;
+        let mut blob = nonce.to_vec();
+        blob.append(&mut sealed);
+        Some(blob)
+    }
+
+    fn open(&self, blob: &[u8]) -> Option<String> {
+        if blob.len() < NONCE_LEN {
+            return None;
+        }
+        let (nonce, sealed) = blob.split_at(NONCE_LEN);
+        let nonce = Nonce::try_assume_unique_for_key(nonce).ok()?;
+        let mut sealed = sealed.to_vec();
+        let text = self
+            .seal
+            .open_in_place(nonce, Aad::empty(), &mut sealed)
+            .ok()?;
+        String::from_utf8(text.to_vec()).ok()
+    }
+
+    fn digest(&self, text: &str) -> Vec<u8> {
+        hmac::sign(&self.mac, text.as_bytes()).as_ref().to_vec()
+    }
+}
 
 /// One remembered copy.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -67,10 +136,10 @@ pub fn recent(app: &AppHandle, limit: usize) -> Vec<Copied> {
     if !ENABLED.load(Ordering::Relaxed) {
         return Vec::new();
     }
-    let Some(path) = db_path(app) else {
+    let (Some(vault), Some(path)) = (VAULT.get(), db_path(app)) else {
         return Vec::new();
     };
-    match open(&path).and_then(|conn| recent_from(&conn, limit)) {
+    match open(&path).and_then(|conn| recent_from(&conn, vault, limit)) {
         Ok(copies) => copies,
         Err(err) => {
             error!("Failed to read the clipboard history: {err}");
@@ -113,11 +182,11 @@ fn remember(app: &AppHandle, text: &str) {
     if !worth_keeping(text) || is_recent_dictation(app, text) {
         return;
     }
-    let Some(path) = db_path(app) else {
+    let (Some(vault), Some(path)) = (VAULT.get(), db_path(app)) else {
         return;
     };
     let now = chrono::Utc::now().timestamp();
-    match open(&path).and_then(|conn| add(&conn, text, now)) {
+    match open(&path).and_then(|conn| add(&conn, vault, text, now)) {
         Ok(()) => {
             debug!("Kept a clipboard copy ({} chars).", text.chars().count());
             crate::tray::update_tray_menu(app);
@@ -129,7 +198,17 @@ fn remember(app: &AppHandle, text: &str) {
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 fn worth_keeping(text: &str) -> bool {
     let trimmed = text.trim();
-    !trimmed.is_empty() && trimmed.chars().count() <= MAX_CHARS && !looks_secret(trimmed)
+    !trimmed.is_empty() && trimmed.chars().count() <= MAX_CHARS
+}
+
+/// What the menu shows for a copy: secrets only by their first characters.
+pub fn shown(text: &str) -> Cow<'_, str> {
+    if looks_secret(text.trim()) {
+        let start: String = text.trim().chars().take(SECRET_SHOWN).collect();
+        Cow::Owned(format!("{start}••••••"))
+    } else {
+        Cow::Borrowed(text)
+    }
 }
 
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
@@ -197,8 +276,8 @@ const SECRET_PARAMS: &[&str] = &[
     "code=",
 ];
 
-/// True for text that shouldn't be remembered: keys, tokens, passwords.
-/// Errs on the side of skipping; a skipped copy still pastes as usual.
+/// True for text that looks like a key, token or password, which the menu
+/// doesn't spell out.
 pub(crate) fn looks_secret(text: &str) -> bool {
     if text.contains("-----BEGIN") {
         return true;
@@ -285,46 +364,75 @@ fn open(path: &Path) -> rusqlite::Result<Connection> {
 }
 
 fn init(conn: &Connection) -> rusqlite::Result<()> {
+    // The first prototype kept plain text in `clipboard_history`: drop it and
+    // wipe its pages from the file.
+    let plain: i64 = conn.query_row(
+        "SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'clipboard_history'",
+        [],
+        |row| row.get(0),
+    )?;
+    if plain > 0 {
+        conn.execute_batch("DROP TABLE clipboard_history; VACUUM;")?;
+    }
     conn.execute_batch(
-        "CREATE TABLE IF NOT EXISTS clipboard_history (
+        "PRAGMA secure_delete = ON;
+        CREATE TABLE IF NOT EXISTS clips (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            text TEXT NOT NULL,
+            digest BLOB NOT NULL,
+            data BLOB NOT NULL,
             copied_at INTEGER NOT NULL
         );",
     )
 }
 
-/// Adds `text` as the newest copy. Copying it again moves it to the top, and
-/// only the newest [`KEEP`] stay.
-fn add(conn: &Connection, text: &str, now: i64) -> rusqlite::Result<()> {
-    conn.execute("DELETE FROM clipboard_history WHERE text = ?1", [text])?;
+/// Adds `text` as the newest copy, encrypted. Copying it again moves it to the
+/// top, and only the newest [`KEEP`] stay.
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+fn add(conn: &Connection, vault: &Vault, text: &str, now: i64) -> rusqlite::Result<()> {
+    let Some(data) = vault.seal(text) else {
+        error!("Failed to encrypt a clipboard copy");
+        return Ok(());
+    };
+    let digest = vault.digest(text);
+    conn.execute("DELETE FROM clips WHERE digest = ?1", [&digest])?;
     conn.execute(
-        "INSERT INTO clipboard_history (text, copied_at) VALUES (?1, ?2)",
-        params![text, now],
+        "INSERT INTO clips (digest, data, copied_at) VALUES (?1, ?2, ?3)",
+        params![digest, data, now],
     )?;
     conn.execute(
-        "DELETE FROM clipboard_history WHERE id NOT IN
-            (SELECT id FROM clipboard_history ORDER BY id DESC LIMIT ?1)",
+        "DELETE FROM clips WHERE id NOT IN (SELECT id FROM clips ORDER BY id DESC LIMIT ?1)",
         [KEEP as i64],
     )?;
     Ok(())
 }
 
-fn recent_from(conn: &Connection, limit: usize) -> rusqlite::Result<Vec<Copied>> {
-    let mut stmt = conn
-        .prepare("SELECT id, text, copied_at FROM clipboard_history ORDER BY id DESC LIMIT ?1")?;
+/// Newest first. Rows the key can't open (from a key since lost) are skipped.
+fn recent_from(conn: &Connection, vault: &Vault, limit: usize) -> rusqlite::Result<Vec<Copied>> {
+    let mut stmt =
+        conn.prepare("SELECT id, data, copied_at FROM clips ORDER BY id DESC LIMIT ?1")?;
     let rows = stmt.query_map([limit as i64], |row| {
-        Ok(Copied {
-            id: row.get(0)?,
-            text: row.get(1)?,
-            copied_at: row.get(2)?,
-        })
+        Ok((
+            row.get::<_, i64>(0)?,
+            row.get::<_, Vec<u8>>(1)?,
+            row.get::<_, i64>(2)?,
+        ))
     })?;
-    rows.collect()
+    let mut copies = Vec::new();
+    for row in rows {
+        let (id, data, copied_at) = row?;
+        if let Some(text) = vault.open(&data) {
+            copies.push(Copied {
+                id,
+                text,
+                copied_at,
+            });
+        }
+    }
+    Ok(copies)
 }
 
 fn clear_db(conn: &Connection) -> rusqlite::Result<()> {
-    conn.execute("DELETE FROM clipboard_history", [])?;
+    conn.execute("DELETE FROM clips", [])?;
     Ok(())
 }
 
@@ -335,18 +443,28 @@ mod macos {
 
     /// How often `changeCount` is checked. Reading it is one integer.
     const POLL: Duration = Duration::from_millis(500);
-    /// Markers apps put on copies that shouldn't be remembered
-    /// (nspasteboard.org). Handy's own reliable paste sets the first two.
+    /// Markers for copies that were never the user's (nspasteboard.org).
+    /// Handy's own reliable paste sets the first. Concealed copies, such as a
+    /// password manager's, are kept: the history is encrypted.
     const SKIP_TYPES: &[&str] = &[
         "org.nspasteboard.TransientType",
-        "org.nspasteboard.ConcealedType",
         "org.nspasteboard.AutoGeneratedType",
         "de.petermaurer.TransientPasteboardType",
-        "com.agilebits.onepassword",
     ];
+    /// The login Keychain item holding the key.
+    const KEYCHAIN_SERVICE: &str = "Handy Clipboard History";
+    const KEYCHAIN_ACCOUNT: &str = "encryption-key";
+    /// `errSecItemNotFound`.
+    const ITEM_NOT_FOUND: i32 = -25300;
+    /// Set when the Keychain refused, so a denied prompt isn't repeated on
+    /// every copy.
+    static KEY_REFUSED: AtomicBool = AtomicBool::new(false);
 
     pub(super) fn watch(app: AppHandle) {
         let mut last = NSPasteboard::generalPasteboard().changeCount();
+        if ENABLED.load(Ordering::Relaxed) {
+            unlock(&app);
+        }
         loop {
             std::thread::sleep(POLL);
             let count = NSPasteboard::generalPasteboard().changeCount();
@@ -354,11 +472,66 @@ mod macos {
                 continue;
             }
             last = count;
-            if !ENABLED.load(Ordering::Relaxed) {
+            if !ENABLED.load(Ordering::Relaxed) || !unlock(&app) {
                 continue;
             }
             if let Some(text) = read_on_main(&app) {
                 remember(&app, &text);
+            }
+        }
+    }
+
+    /// Gets the key from the Keychain, creating it on first use. A new key
+    /// can't open older copies, so they're dropped.
+    fn unlock(app: &AppHandle) -> bool {
+        if VAULT.get().is_some() {
+            return true;
+        }
+        if KEY_REFUSED.load(Ordering::Relaxed) {
+            return false;
+        }
+        let Some((bytes, created)) = load_or_create_key() else {
+            KEY_REFUSED.store(true, Ordering::Relaxed);
+            return false;
+        };
+        let Some(vault) = Vault::from_bytes(&bytes) else {
+            error!("The clipboard history key in the Keychain has the wrong size");
+            KEY_REFUSED.store(true, Ordering::Relaxed);
+            return false;
+        };
+        if created {
+            if let Some(path) = db_path(app) {
+                if let Err(err) = open(&path).and_then(|conn| clear_db(&conn)) {
+                    error!("Failed to drop copies sealed with an older key: {err}");
+                }
+            }
+        }
+        let _ = VAULT.set(vault);
+        crate::tray::update_tray_menu(app);
+        true
+    }
+
+    fn load_or_create_key() -> Option<(Vec<u8>, bool)> {
+        use security_framework::passwords::{get_generic_password, set_generic_password};
+        match get_generic_password(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT) {
+            Ok(bytes) => Some((bytes, false)),
+            Err(err) if err.code() == ITEM_NOT_FOUND => {
+                let mut bytes = vec![0u8; Vault::KEY_LEN];
+                SystemRandom::new().fill(&mut bytes).ok()?;
+                match set_generic_password(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT, &bytes) {
+                    Ok(()) => {
+                        info!("Created the clipboard history key in the Keychain.");
+                        Some((bytes, true))
+                    }
+                    Err(err) => {
+                        error!("Failed to save the clipboard history key: {err}");
+                        None
+                    }
+                }
+            }
+            Err(err) => {
+                error!("Keychain refused the clipboard history key: {err}");
+                None
             }
         }
     }
@@ -431,20 +604,70 @@ mod tests {
     }
 
     #[test]
-    fn blank_and_huge_copies_are_skipped() {
+    fn blank_and_huge_copies_are_skipped_but_secrets_kept() {
         assert!(!worth_keeping("   \n "));
         assert!(!worth_keeping(&"a ".repeat(MAX_CHARS)));
         assert!(worth_keeping("Oi"));
+        assert!(worth_keeping("Xk9#mP2q"));
+        assert!(worth_keeping("ghp_16C7e42F292c6912E7710c838347Ae178B4a"));
+    }
+
+    #[test]
+    fn the_menu_shows_only_the_start_of_a_secret() {
+        assert_eq!(shown("Xk9#mP2q"), "Xk9••••••");
+        assert_eq!(shown("Bom dia, tudo bem?"), "Bom dia, tudo bem?");
+    }
+
+    fn vault() -> Vault {
+        Vault::from_bytes(&[7u8; Vault::KEY_LEN]).unwrap()
+    }
+
+    #[test]
+    fn copies_are_stored_encrypted() {
+        let conn = Connection::open_in_memory().unwrap();
+        init(&conn).unwrap();
+        add(&conn, &vault(), "my secret password", 1).unwrap();
+        let data: Vec<u8> = conn
+            .query_row("SELECT data FROM clips", [], |row| row.get(0))
+            .unwrap();
+        assert!(!data.windows(6).any(|w| w == b"secret"));
+        assert_eq!(
+            recent_from(&conn, &vault(), 1).unwrap()[0].text,
+            "my secret password"
+        );
+
+        let other = Vault::from_bytes(&[8u8; Vault::KEY_LEN]).unwrap();
+        assert!(recent_from(&conn, &other, 1).unwrap().is_empty());
+    }
+
+    #[test]
+    fn the_plain_text_prototype_table_is_dropped() {
+        let conn = Connection::open_in_memory().unwrap();
+        conn.execute_batch(
+            "CREATE TABLE clipboard_history (id INTEGER PRIMARY KEY, text TEXT, copied_at INTEGER);
+            INSERT INTO clipboard_history (text, copied_at) VALUES ('old', 1);",
+        )
+        .unwrap();
+        init(&conn).unwrap();
+        let plain: i64 = conn
+            .query_row(
+                "SELECT count(*) FROM sqlite_master WHERE name = 'clipboard_history'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
+        assert_eq!(plain, 0);
     }
 
     #[test]
     fn copying_again_moves_to_the_top_and_old_ones_drop() {
         let conn = Connection::open_in_memory().unwrap();
         init(&conn).unwrap();
-        add(&conn, "first", 1).unwrap();
-        add(&conn, "second", 2).unwrap();
-        add(&conn, "first", 3).unwrap();
-        let texts: Vec<String> = recent_from(&conn, 10)
+        let v = vault();
+        add(&conn, &v, "first", 1).unwrap();
+        add(&conn, &v, "second", 2).unwrap();
+        add(&conn, &v, "first", 3).unwrap();
+        let texts: Vec<String> = recent_from(&conn, &v, 10)
             .unwrap()
             .into_iter()
             .map(|copy| copy.text)
@@ -452,13 +675,13 @@ mod tests {
         assert_eq!(texts, ["first", "second"]);
 
         for n in 0..KEEP + 5 {
-            add(&conn, &format!("copy {n}"), 10 + n as i64).unwrap();
+            add(&conn, &v, &format!("copy {n}"), 10 + n as i64).unwrap();
         }
-        let all = recent_from(&conn, KEEP * 2).unwrap();
+        let all = recent_from(&conn, &v, KEEP * 2).unwrap();
         assert_eq!(all.len(), KEEP);
         assert_eq!(all[0].text, format!("copy {}", KEEP + 4));
 
         clear_db(&conn).unwrap();
-        assert!(recent_from(&conn, 10).unwrap().is_empty());
+        assert!(recent_from(&conn, &v, 10).unwrap().is_empty());
     }
 }

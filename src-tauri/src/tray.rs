@@ -425,7 +425,7 @@ fn compute_desired(app: &AppHandle, icon_state: TrayIconState) -> TrayDesired {
         .into_iter()
         .map(|copy| RecentText {
             id: copy.id,
-            label: menu_label(&copy.text, copy.copied_at),
+            label: menu_label(&crate::clipboard_history::shown(&copy.text), copy.copied_at),
             text: copy.text,
         })
         .collect();

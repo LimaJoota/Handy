@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Historial del portapapeles",
-        "description": "Guarda lo que copias y lo muestra en la barra de menús, del más reciente al más antiguo. Omite contraseñas, claves y dictados. Al desactivarlo se borra el historial."
+        "description": "Guarda lo que copias, cifrado, y lo muestra en la barra de menús, del más reciente al más antiguo. Omite los dictados. Al desactivarlo se borra el historial."
       },
       "autoSubmit": {
         "title": "Envío automático",

@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Zwischenablage-Verlauf",
-        "description": "Speichert, was Sie kopieren, und zeigt es in der Menüleiste an, das Neueste zuerst. Passwörter, Schlüssel und Diktate werden übersprungen. Beim Ausschalten wird der Verlauf gelöscht."
+        "description": "Speichert verschlüsselt, was Sie kopieren, und zeigt es in der Menüleiste an, das Neueste zuerst. Diktate werden übersprungen. Beim Ausschalten wird der Verlauf gelöscht."
       },
       "autoSubmit": {
         "title": "Automatisch absenden",

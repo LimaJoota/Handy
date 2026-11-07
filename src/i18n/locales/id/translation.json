@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Riwayat Papan Klip",
-        "description": "Menyimpan yang Anda salin dan menampilkannya di bilah menu, terbaru lebih dulu. Kata sandi, kunci, dan dikte dilewati. Mematikannya menghapus riwayat."
+        "description": "Menyimpan yang Anda salin dalam bentuk terenkripsi dan menampilkannya di bilah menu, terbaru lebih dulu. Dikte dilewati. Mematikannya menghapus riwayat."
       },
       "autoSubmit": {
         "title": "Kirim Otomatis",

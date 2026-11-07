@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Historique du presse-papiers",
-        "description": "Conserve ce que vous copiez et l'affiche dans la barre des menus, du plus récent au plus ancien. Les mots de passe, clés et dictées sont ignorés. Le désactiver efface l'historique."
+        "description": "Conserve, chiffré, ce que vous copiez et l'affiche dans la barre des menus, du plus récent au plus ancien. Les dictées sont ignorées. Le désactiver efface l'historique."
       },
       "autoSubmit": {
         "title": "Envoi automatique",

@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Lịch sử Clipboard",
-        "description": "Lưu những gì bạn sao chép và liệt kê trên thanh menu, mới nhất trước. Mật khẩu, khóa và nội dung đọc chính tả được bỏ qua. Tắt sẽ xóa lịch sử."
+        "description": "Lưu những gì bạn sao chép ở dạng mã hóa và liệt kê trên thanh menu, mới nhất trước. Nội dung đọc chính tả được bỏ qua. Tắt sẽ xóa lịch sử."
       },
       "autoSubmit": {
         "title": "Gửi tự động",

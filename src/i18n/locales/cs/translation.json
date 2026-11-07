@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Historie schránky",
-        "description": "Uchovává, co zkopírujete, a zobrazuje to v řádku nabídek od nejnovějšího. Hesla, klíče a diktování se přeskakují. Vypnutím se historie smaže."
+        "description": "Uchovává zašifrovaně, co zkopírujete, a zobrazuje to v řádku nabídek od nejnovějšího. Diktování se přeskakuje. Vypnutím se historie smaže."
       },
       "autoSubmit": {
         "title": "Automatické odeslání",

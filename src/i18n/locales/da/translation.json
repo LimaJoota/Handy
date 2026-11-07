@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Udklipsholderhistorik",
-        "description": "Gemmer det, du kopierer, og viser det i menulinjen, nyeste først. Adgangskoder, nøgler og dikteringer springes over. Når den slås fra, slettes historikken."
+        "description": "Gemmer det, du kopierer, krypteret, og viser det i menulinjen, nyeste først. Dikteringer springes over. Når den slås fra, slettes historikken."
       },
       "autoSubmit": {
         "title": "Automatisk indsendelse",

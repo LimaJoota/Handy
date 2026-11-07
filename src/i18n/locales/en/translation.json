@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Clipboard History",
-        "description": "Keeps what you copy and lists it in the menu bar, newest first. Passwords, keys and dictations are skipped. Turning it off erases it."
+        "description": "Keeps what you copy, encrypted, and lists it in the menu bar, newest first. Dictations are left out. Turning it off erases it."
       },
       "autoSubmit": {
         "title": "Auto Submit",

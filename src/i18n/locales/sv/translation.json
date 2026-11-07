@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Urklippshistorik",
-        "description": "Sparar det du kopierar och visar det i menyraden, nyast först. Lösenord, nycklar och dikteringar hoppas över. Att stänga av raderar historiken."
+        "description": "Sparar det du kopierar, krypterat, och visar det i menyraden, nyast först. Dikteringar hoppas över. Att stänga av raderar historiken."
       },
       "autoSubmit": {
         "title": "Skicka automatiskt",

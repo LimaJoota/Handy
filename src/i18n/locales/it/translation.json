@@ -568,7 +568,7 @@
       },
       "clipboardHistory": {
         "label": "Cronologia Appunti",
-        "description": "Conserva ciò che copi e lo elenca nella barra dei menu, dal più recente. Password, chiavi e dettature vengono ignorate. Disattivarla cancella la cronologia."
+        "description": "Conserva ciò che copi, cifrato, e lo elenca nella barra dei menu, dal più recente. Le dettature vengono ignorate. Disattivarla cancella la cronologia."
       },
       "autoSubmit": {
         "title": "Invio automatico",
