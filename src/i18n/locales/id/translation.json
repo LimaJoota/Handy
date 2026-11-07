@@ -4,6 +4,8 @@
     "checkUpdates": "Periksa Pembaruan...",
     "copyLastTranscript": "Salin Transkripsi Terakhir",
     "recentTranscripts": "Transkrip terbaru",
+    "copiedRecently": "Baru disalin",
+    "clearCopied": "Hapus riwayat salinan",
     "unloadModel": "Keluarkan Model dari Memori",
     "model": "Model",
     "quit": "Keluar",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "Salin jika tidak tertempel"
         },
         "copyIfNotPastedDescription": "Mempertahankan papan klip saat penempelan berhasil. Jika tidak ada aplikasi yang membacanya, transkrip tetap di sana untuk Anda tempel."
+      },
+      "clipboardHistory": {
+        "label": "Riwayat Papan Klip",
+        "description": "Menyimpan yang Anda salin dan menampilkannya di bilah menu, terbaru lebih dulu. Kata sandi, kunci, dan dikte dilewati. Mematikannya menghapus riwayat."
       },
       "autoSubmit": {
         "title": "Kirim Otomatis",

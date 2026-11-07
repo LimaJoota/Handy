@@ -4,6 +4,8 @@
     "checkUpdates": "Nach Updates suchen...",
     "copyLastTranscript": "Letzte Transkription kopieren",
     "recentTranscripts": "Letzte Transkriptionen",
+    "copiedRecently": "Zuletzt kopiert",
+    "clearCopied": "Kopierverlauf löschen",
     "unloadModel": "Modell entladen",
     "model": "Modell",
     "quit": "Beenden",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "Kopieren, wenn nicht eingefügt"
         },
         "copyIfNotPastedDescription": "Behält deine Zwischenablage, wenn das Einfügen klappt. Liest keine App den Text, bleibt die Transkription zum Einfügen dort."
+      },
+      "clipboardHistory": {
+        "label": "Zwischenablage-Verlauf",
+        "description": "Speichert, was Sie kopieren, und zeigt es in der Menüleiste an, das Neueste zuerst. Passwörter, Schlüssel und Diktate werden übersprungen. Beim Ausschalten wird der Verlauf gelöscht."
       },
       "autoSubmit": {
         "title": "Automatisch absenden",

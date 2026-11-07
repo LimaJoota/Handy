@@ -4,6 +4,8 @@
     "checkUpdates": "Verifica aggiornamenti...",
     "copyLastTranscript": "Copia l'ultima trascrizione",
     "recentTranscripts": "Trascrizioni recenti",
+    "copiedRecently": "Copiati di recente",
+    "clearCopied": "Cancella cronologia copie",
     "unloadModel": "Rilascia modello",
     "model": "Modello",
     "quit": "Esci",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "Copia se non incollato"
         },
         "copyIfNotPastedDescription": "Mantiene i tuoi appunti se l'incolla riesce. Se nessuna app legge il testo, la trascrizione resta lì per incollarla tu."
+      },
+      "clipboardHistory": {
+        "label": "Cronologia Appunti",
+        "description": "Conserva ciò che copi e lo elenca nella barra dei menu, dal più recente. Password, chiavi e dettature vengono ignorate. Disattivarla cancella la cronologia."
       },
       "autoSubmit": {
         "title": "Invio automatico",

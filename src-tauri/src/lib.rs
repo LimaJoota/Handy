@@ -8,6 +8,7 @@ mod catalog;
 mod chinese_script;
 pub mod cli;
 mod clipboard;
+mod clipboard_history;
 mod commands;
 pub mod engine_supervisor;
 mod helpers;
@@ -221,6 +222,7 @@ fn initialize_core_logic(app_handle: &AppHandle) {
     app_handle.manage(history_manager.clone());
     app_handle.manage(tray::TrayState::new());
     app_handle.manage(TranscriptionJobManager::new(app_handle));
+    clipboard_history::start(app_handle);
 
     // Note: Shortcuts are NOT initialized here.
     // The frontend is responsible for calling the `initialize_shortcuts` command
@@ -312,6 +314,14 @@ fn initialize_core_logic(app_handle: &AppHandle) {
                 if let Ok(id) = id["recent_transcript:".len()..].parse() {
                     tray::copy_recent_transcript(app, id);
                 }
+            }
+            id if id.starts_with("copied:") => {
+                if let Ok(id) = id["copied:".len()..].parse() {
+                    tray::copy_copied_item(app, id);
+                }
+            }
+            "clear_copied" => {
+                clipboard_history::clear(app);
             }
             "unload_model" => {
                 let transcription_manager = app.state::<Arc<TranscriptionManager>>();
@@ -737,6 +747,7 @@ pub fn run(cli_args: CliArgs) {
             shortcut::resume_all_bindings,
             shortcut::change_mute_while_recording_setting,
             shortcut::change_append_trailing_space_setting,
+            clipboard_history::change_clipboard_history_setting,
             shortcut::change_lazy_stream_close_setting,
             shortcut::change_vad_enabled_setting,
             shortcut::change_long_form_chunking_setting,

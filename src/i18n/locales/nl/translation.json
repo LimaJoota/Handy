@@ -4,6 +4,8 @@
     "checkUpdates": "Controleren op updates...",
     "copyLastTranscript": "Laatste transcriptie kopiëren",
     "recentTranscripts": "Recente transcripties",
+    "copiedRecently": "Recent gekopieerd",
+    "clearCopied": "Kopieergeschiedenis wissen",
     "unloadModel": "Model ontladen",
     "model": "Model",
     "quit": "Afsluiten",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "Kopiëren als niet geplakt"
         },
         "copyIfNotPastedDescription": "Bewaart je klembord als het plakken lukt. Leest geen app de tekst, dan blijft de transcriptie staan om zelf te plakken."
+      },
+      "clipboardHistory": {
+        "label": "Klembordgeschiedenis",
+        "description": "Bewaart wat je kopieert en toont het in de menubalk, nieuwste eerst. Wachtwoorden, sleutels en dictaten worden overgeslagen. Uitzetten wist de geschiedenis."
       },
       "autoSubmit": {
         "title": "Automatisch verzenden",

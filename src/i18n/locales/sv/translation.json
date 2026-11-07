@@ -4,6 +4,8 @@
     "checkUpdates": "Sök efter uppdateringar...",
     "copyLastTranscript": "Kopiera senaste transkriptionen",
     "recentTranscripts": "Senaste transkriptioner",
+    "copiedRecently": "Nyligen kopierat",
+    "clearCopied": "Rensa kopieringshistorik",
     "unloadModel": "Avlasta modell",
     "model": "Modell",
     "quit": "Avsluta",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "Kopiera om inte inklistrat"
         },
         "copyIfNotPastedDescription": "Behåller ditt urklipp när inklistringen lyckas. Om ingen app läser texten ligger transkriptionen kvar så att du kan klistra in den."
+      },
+      "clipboardHistory": {
+        "label": "Urklippshistorik",
+        "description": "Sparar det du kopierar och visar det i menyraden, nyast först. Lösenord, nycklar och dikteringar hoppas över. Att stänga av raderar historiken."
       },
       "autoSubmit": {
         "title": "Skicka automatiskt",

@@ -4,6 +4,8 @@
     "checkUpdates": "Zkontrolovat aktualizace...",
     "copyLastTranscript": "Zkopírovat poslední přepis",
     "recentTranscripts": "Poslední přepisy",
+    "copiedRecently": "Nedávno zkopírované",
+    "clearCopied": "Vymazat historii kopírování",
     "unloadModel": "Uvolnit model",
     "model": "Model",
     "quit": "Ukončit",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "Kopírovat, pokud se nevložilo"
         },
         "copyIfNotPastedDescription": "Zachová schránku, když se vložení povede. Když text žádná aplikace nepřečte, přepis ve schránce zůstane, abyste ho mohli vložit."
+      },
+      "clipboardHistory": {
+        "label": "Historie schránky",
+        "description": "Uchovává, co zkopírujete, a zobrazuje to v řádku nabídek od nejnovějšího. Hesla, klíče a diktování se přeskakují. Vypnutím se historie smaže."
       },
       "autoSubmit": {
         "title": "Automatické odeslání",

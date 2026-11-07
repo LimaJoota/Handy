@@ -4,6 +4,8 @@
     "checkUpdates": "Rechercher des mises à jour...",
     "copyLastTranscript": "Copier la dernière transcription",
     "recentTranscripts": "Transcriptions récentes",
+    "copiedRecently": "Copiés récemment",
+    "clearCopied": "Effacer l'historique des copies",
     "unloadModel": "Décharger le modèle",
     "model": "Modèle",
     "quit": "Quitter",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "Copier si non collé"
         },
         "copyIfNotPastedDescription": "Conserve votre presse-papiers si le collage réussit. Si aucune app ne le lit, la transcription y reste pour que vous la colliez."
+      },
+      "clipboardHistory": {
+        "label": "Historique du presse-papiers",
+        "description": "Conserve ce que vous copiez et l'affiche dans la barre des menus, du plus récent au plus ancien. Les mots de passe, clés et dictées sont ignorés. Le désactiver efface l'historique."
       },
       "autoSubmit": {
         "title": "Envoi automatique",

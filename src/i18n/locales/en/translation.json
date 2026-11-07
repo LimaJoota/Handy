@@ -4,6 +4,8 @@
     "checkUpdates": "Check for Updates...",
     "copyLastTranscript": "Copy Last Transcript",
     "recentTranscripts": "Recent Transcripts",
+    "copiedRecently": "Recently Copied",
+    "clearCopied": "Clear Copy History",
     "unloadModel": "Unload Model",
     "model": "Model",
     "quit": "Quit",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "Copy if Not Pasted"
         },
         "copyIfNotPastedDescription": "Keeps your clipboard when the paste lands. If no app reads it, the transcript stays there for you to paste."
+      },
+      "clipboardHistory": {
+        "label": "Clipboard History",
+        "description": "Keeps what you copy and lists it in the menu bar, newest first. Passwords, keys and dictations are skipped. Turning it off erases it."
       },
       "autoSubmit": {
         "title": "Auto Submit",

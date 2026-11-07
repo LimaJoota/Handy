@@ -4,6 +4,8 @@
     "checkUpdates": "Verificar Atualizações...",
     "copyLastTranscript": "Copiar última transcrição",
     "recentTranscripts": "Últimas transcrições",
+    "copiedRecently": "Copiados recentemente",
+    "clearCopied": "Limpar histórico de copiados",
     "unloadModel": "Descarregar modelo",
     "model": "Modelo",
     "quit": "Sair",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "Copiar se Não Colar"
         },
         "copyIfNotPastedDescription": "Mantém sua área de transferência quando a colagem dá certo. Se nenhum app ler o texto, a transcrição fica lá para você colar."
+      },
+      "clipboardHistory": {
+        "label": "Histórico da Área de Transferência",
+        "description": "Guarda o que você copia e lista na barra de menus, do mais recente ao mais antigo. Senhas, chaves e ditados ficam de fora. Desligar apaga o histórico."
       },
       "autoSubmit": {
         "title": "Envio automático",

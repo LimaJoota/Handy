@@ -72,7 +72,9 @@ struct MenuInputs {
     locale: String,
     update_checks_enabled: bool,
     /// Newest first, listed in the tray menu.
-    recent_transcripts: Vec<RecentTranscript>,
+    recent_transcripts: Vec<RecentText>,
+    /// Clipboard copies, newest first, when clipboard history is on.
+    copied: Vec<RecentText>,
     /// The language submenu, when the selected model has languages to pick.
     language: Option<LanguageMenu>,
 }
@@ -93,11 +95,11 @@ struct LanguageMenu {
     others: Vec<(String, String)>,
 }
 
-/// One recent transcript in the tray menu. Holds the full text so a
+/// One recent transcript or copy in the tray menu. Holds the full text so a
 /// click copies exactly what the menu was built from, with no DB read on the
 /// main thread.
 #[derive(Clone, Debug, PartialEq, Eq)]
-struct RecentTranscript {
+struct RecentText {
     id: i64,
     label: String,
     text: String,
@@ -405,7 +407,7 @@ fn compute_desired(app: &AppHandle, icon_state: TrayIconState) -> TrayDesired {
             |hm| match hm.get_recent_completed_entries(RECENT_TRANSCRIPTS) {
                 Ok(entries) => entries
                     .iter()
-                    .map(|entry| RecentTranscript {
+                    .map(|entry| RecentText {
                         id: entry.id,
                         label: recent_transcript_label(entry),
                         text: last_transcript_text(entry).to_string(),
@@ -418,6 +420,15 @@ fn compute_desired(app: &AppHandle, icon_state: TrayIconState) -> TrayDesired {
             },
         )
         .unwrap_or_default();
+
+    let copied = crate::clipboard_history::recent(app, crate::clipboard_history::TRAY_ITEMS)
+        .into_iter()
+        .map(|copy| RecentText {
+            id: copy.id,
+            label: menu_label(&copy.text, copy.copied_at),
+            text: copy.text,
+        })
+        .collect();
 
     TrayDesired {
         icon_path: get_icon_path(theme, icon_state, badge),
@@ -432,6 +443,7 @@ fn compute_desired(app: &AppHandle, icon_state: TrayIconState) -> TrayDesired {
             locale: settings.app_language,
             update_checks_enabled: settings.update_checks_enabled,
             recent_transcripts,
+            copied,
             language,
         },
     }
@@ -750,6 +762,34 @@ fn build_menu(app: &AppHandle, inputs: &MenuInputs) -> tauri::Result<(Menu<tauri
             )
         })
         .collect::<tauri::Result<Vec<_>>>()?;
+    // Then what was copied, Clipy style: click one to copy it again.
+    let copied_header = MenuItem::with_id(
+        app,
+        "copied_recently",
+        &strings.copied_recently,
+        false,
+        None::<&str>,
+    )?;
+    let copied_items = inputs
+        .copied
+        .iter()
+        .map(|copy| {
+            MenuItem::with_id(
+                app,
+                format!("copied:{}", copy.id),
+                &copy.label,
+                true,
+                None::<&str>,
+            )
+        })
+        .collect::<tauri::Result<Vec<_>>>()?;
+    let clear_copied_i = MenuItem::with_id(
+        app,
+        "clear_copied",
+        &strings.clear_copied,
+        true,
+        None::<&str>,
+    )?;
     let quit_i = MenuItem::with_id(app, "quit", &strings.quit, true, quit_accelerator)?;
     let separator = || PredefinedMenuItem::separator(app);
 
@@ -830,21 +870,31 @@ fn build_menu(app: &AppHandle, inputs: &MenuInputs) -> tauri::Result<(Menu<tauri
     }
 
     // Under "Copy Last Transcript" in both layouts: a separator, the header,
-    // then the transcripts.
-    if !recent_items.is_empty() {
-        let copy_last_position = menu
-            .items()?
-            .iter()
-            .position(|item| item.id() == "copy_last_transcript")
-            .unwrap_or(0);
-        let mut position = copy_last_position + 1;
+    // then the transcripts; then the same for clipboard copies, with a way to
+    // clear them.
+    let mut position = menu
+        .items()?
+        .iter()
+        .position(|item| item.id() == "copy_last_transcript")
+        .unwrap_or(0);
+    for (header, items) in [
+        (&recent_header, &recent_items),
+        (&copied_header, &copied_items),
+    ] {
+        if items.is_empty() {
+            continue;
+        }
+        position += 1;
         menu.insert(&separator()?, position)?;
         position += 1;
-        menu.insert(&recent_header, position)?;
-        for item in &recent_items {
+        menu.insert(header, position)?;
+        for item in items {
             position += 1;
             menu.insert(item, position)?;
         }
+    }
+    if !copied_items.is_empty() {
+        menu.insert(&clear_copied_i, position + 1)?;
     }
 
     // Both layouts start with [version, separator, ...]; slot the warnings in
@@ -876,15 +926,17 @@ pub(crate) fn last_transcript_text(entry: &HistoryEntry) -> &str {
 
 /// `HH:MM  first words…` on one line, for the tray menu.
 fn recent_transcript_label(entry: &HistoryEntry) -> String {
-    let text = last_transcript_text(entry)
-        .split_whitespace()
-        .collect::<Vec<_>>()
-        .join(" ");
+    menu_label(last_transcript_text(entry), entry.timestamp)
+}
+
+/// `HH:MM  first words…` of `text`, saved at `timestamp` (Unix seconds).
+fn menu_label(text: &str, timestamp: i64) -> String {
+    let text = text.split_whitespace().collect::<Vec<_>>().join(" ");
     let mut preview: String = text.chars().take(RECENT_LABEL_CHARS).collect();
     if text.chars().count() > RECENT_LABEL_CHARS {
         preview = format!("{}…", preview.trim_end());
     }
-    let label = match Local.timestamp_opt(entry.timestamp, 0).single() {
+    let label = match Local.timestamp_opt(timestamp, 0).single() {
         Some(time) => format!("{}  {}", time.format("%H:%M"), preview),
         None => preview,
     };
@@ -915,6 +967,29 @@ pub fn copy_recent_transcript(app: &AppHandle, id: i64) {
         return;
     }
     info!("Copied recent transcript {id} to clipboard via tray.");
+}
+
+/// Copies a clipboard history item picked from the tray menu. The worker sees
+/// the copy and moves it to the top.
+pub fn copy_copied_item(app: &AppHandle, id: i64) {
+    let Some(state) = app.try_state::<TrayState>() else {
+        return;
+    };
+    let text = state.lock().applied_menu.as_ref().and_then(|menu| {
+        menu.copied
+            .iter()
+            .find(|copy| copy.id == id)
+            .map(|copy| copy.text.clone())
+    });
+    let Some(text) = text else {
+        warn!("Copied item {id} is no longer in the tray menu");
+        return;
+    };
+    if let Err(err) = app.clipboard().write_text(text) {
+        error!("Failed to copy a clipboard history item: {}", err);
+        return;
+    }
+    info!("Copied clipboard history item {id} via tray.");
 }
 
 pub fn set_tray_visibility(app: &AppHandle, visible: bool) {
@@ -1112,6 +1187,7 @@ mod tests {
             locale: "en".to_string(),
             update_checks_enabled: true,
             recent_transcripts: Vec::new(),
+            copied: Vec::new(),
             language: None,
         }
     }

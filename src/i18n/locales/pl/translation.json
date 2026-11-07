@@ -4,6 +4,8 @@
     "checkUpdates": "Sprawdź aktualizacje...",
     "copyLastTranscript": "Kopiuj ostatnią transkrypcję",
     "recentTranscripts": "Ostatnie transkrypcje",
+    "copiedRecently": "Ostatnio skopiowane",
+    "clearCopied": "Wyczyść historię kopiowania",
     "unloadModel": "Zwolnij model",
     "model": "Model",
     "quit": "Zamknij",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "Kopiuj, jeśli nie wklejono"
         },
         "copyIfNotPastedDescription": "Zachowuje schowek, gdy wklejenie się uda. Jeśli żadna aplikacja nie odczyta tekstu, transkrypcja zostaje w schowku do wklejenia."
+      },
+      "clipboardHistory": {
+        "label": "Historia schowka",
+        "description": "Zapamiętuje to, co kopiujesz, i pokazuje na pasku menu, od najnowszych. Hasła, klucze i dyktowania są pomijane. Wyłączenie usuwa historię."
       },
       "autoSubmit": {
         "title": "Automatyczne wysyłanie",

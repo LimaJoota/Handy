@@ -4,6 +4,8 @@
     "checkUpdates": "Kiểm tra cập nhật...",
     "copyLastTranscript": "Sao chép bản chép lời mới nhất",
     "recentTranscripts": "Bản ghi gần đây",
+    "copiedRecently": "Đã sao chép gần đây",
+    "clearCopied": "Xóa lịch sử sao chép",
     "unloadModel": "Dỡ mô hình",
     "model": "Mô hình",
     "quit": "Thoát",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "Sao chép nếu chưa dán"
         },
         "copyIfNotPastedDescription": "Giữ nguyên bộ nhớ tạm khi dán thành công. Nếu không ứng dụng nào đọc, bản ghi sẽ ở lại đó để bạn tự dán."
+      },
+      "clipboardHistory": {
+        "label": "Lịch sử Clipboard",
+        "description": "Lưu những gì bạn sao chép và liệt kê trên thanh menu, mới nhất trước. Mật khẩu, khóa và nội dung đọc chính tả được bỏ qua. Tắt sẽ xóa lịch sử."
       },
       "autoSubmit": {
         "title": "Gửi tự động",

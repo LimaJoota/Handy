@@ -4,6 +4,8 @@
     "checkUpdates": "Güncellemeleri Kontrol Et...",
     "copyLastTranscript": "Son Transkripti Kopyala",
     "recentTranscripts": "Son dökümler",
+    "copiedRecently": "Son kopyalananlar",
+    "clearCopied": "Kopyalama geçmişini temizle",
     "unloadModel": "Modeli Boşalt",
     "model": "Model",
     "quit": "Çıkış",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "Yapıştırılmazsa kopyala"
         },
         "copyIfNotPastedDescription": "Yapıştırma başarılı olursa panonu korur. Hiçbir uygulama okumazsa döküm, senin yapıştırman için panoda kalır."
+      },
+      "clipboardHistory": {
+        "label": "Pano Geçmişi",
+        "description": "Kopyaladıklarınızı saklar ve menü çubuğunda en yeniden eskiye listeler. Parolalar, anahtarlar ve dikteler atlanır. Kapatmak geçmişi siler."
       },
       "autoSubmit": {
         "title": "Otomatik Gönder",

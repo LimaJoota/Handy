@@ -4,6 +4,8 @@
     "checkUpdates": "アップデートを確認…",
     "copyLastTranscript": "最新の文字起こしをコピー",
     "recentTranscripts": "最近の文字起こし",
+    "copiedRecently": "最近コピーした項目",
+    "clearCopied": "コピー履歴を消去",
     "unloadModel": "モデルをアンロード",
     "model": "モデル",
     "quit": "終了",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "貼り付けられなければコピー"
         },
         "copyIfNotPastedDescription": "貼り付けに成功したらクリップボードを保持します。どのアプリも読み取らなければ、文字起こしをそこに残すので手動で貼り付けられます。"
+      },
+      "clipboardHistory": {
+        "label": "クリップボード履歴",
+        "description": "コピーした内容を保存し、新しい順にメニューバーに表示します。パスワード、キー、音声入力は保存しません。オフにすると履歴は消去されます。"
       },
       "autoSubmit": {
         "title": "自動送信",

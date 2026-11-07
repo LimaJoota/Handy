@@ -4,6 +4,8 @@
     "checkUpdates": "Comprova si hi ha actualitzacions...",
     "copyLastTranscript": "Copia l'última transcripció",
     "recentTranscripts": "Transcripcions recents",
+    "copiedRecently": "Copiat recentment",
+    "clearCopied": "Esborra l'historial de còpies",
     "unloadModel": "Allibera el model de la memòria",
     "model": "Model",
     "quit": "Surt",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "Copia si no s'enganxa"
         },
         "copyIfNotPastedDescription": "Conserva el porta-retalls si l'enganxat funciona. Si cap app no el llegeix, la transcripció s'hi queda perquè l'enganxis."
+      },
+      "clipboardHistory": {
+        "label": "Historial del porta-retalls",
+        "description": "Desa el que copies i ho mostra a la barra de menús, del més recent al més antic. S'ometen contrasenyes, claus i dictats. Desactivar-lo esborra l'historial."
       },
       "autoSubmit": {
         "title": "Enviament automàtic",

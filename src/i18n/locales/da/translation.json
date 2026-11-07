@@ -4,6 +4,8 @@
     "checkUpdates": "Tjek for opdateringer...",
     "copyLastTranscript": "Kopiér seneste transskription",
     "recentTranscripts": "Seneste transskriptioner",
+    "copiedRecently": "Senest kopieret",
+    "clearCopied": "Ryd kopihistorik",
     "unloadModel": "Frigør model",
     "model": "Model",
     "quit": "Afslut",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "Kopiér hvis ikke indsat"
         },
         "copyIfNotPastedDescription": "Bevarer din udklipsholder, når indsættelsen lykkes. Læser ingen app teksten, bliver transskriptionen der, så du kan indsætte den."
+      },
+      "clipboardHistory": {
+        "label": "Udklipsholderhistorik",
+        "description": "Gemmer det, du kopierer, og viser det i menulinjen, nyeste først. Adgangskoder, nøgler og dikteringer springes over. Når den slås fra, slettes historikken."
       },
       "autoSubmit": {
         "title": "Automatisk indsendelse",

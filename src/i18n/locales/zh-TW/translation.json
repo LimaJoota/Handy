@@ -4,6 +4,8 @@
     "checkUpdates": "檢查更新...",
     "copyLastTranscript": "複製最新轉錄",
     "recentTranscripts": "最近的轉錄",
+    "copiedRecently": "最近複製",
+    "clearCopied": "清除複製記錄",
     "unloadModel": "卸載模型",
     "model": "模型",
     "quit": "結束",
@@ -563,6 +565,10 @@
           "copyIfNotPasted": "未貼上時複製"
         },
         "copyIfNotPastedDescription": "貼上成功時保留剪貼簿內容。如果沒有應用程式讀取，轉錄內容會留在剪貼簿中，方便你手動貼上。"
+      },
+      "clipboardHistory": {
+        "label": "剪貼簿記錄",
+        "description": "保存你複製的內容，並依新到舊顯示在選單列中。密碼、金鑰和聽寫內容會被略過。關閉後記錄將被清除。"
       },
       "autoSubmit": {
         "title": "自動送出",
