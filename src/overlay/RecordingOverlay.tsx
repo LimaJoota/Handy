@@ -382,8 +382,8 @@ const RecordingOverlay: React.FC = () => {
     ? () => commands.dismissOverlayNotice()
     : undefined;
 
-  // ---- Paste recovery: the transcript that may not have landed, with Copy.
-  // Nothing touches the clipboard until Copy is clicked.
+  // ---- Paste recovery: the transcripts that may not have landed. A click
+  // anywhere on a row copies it; nothing touches the clipboard before that.
   if (state === "recovery") {
     return (
       <div dir={direction} className={`ov-stage ${position}`}>
@@ -392,42 +392,39 @@ const RecordingOverlay: React.FC = () => {
           onMouseEnter={() => setRecoveryHeld(true)}
           onMouseLeave={() => setRecoveryHeld(false)}
         >
-          <div className="srecover-list">
-            {recovery.texts.map((text, index) => (
-              <div className="srecover-row" key={index}>
-                <p>{text}</p>
-                <button
-                  className="scopy"
-                  onClick={() => commands.copyPasteRecoveryText(index)}
-                >
-                  {t("overlay.recovery.copy")}
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className="sbase">
-            <div className="sbase-l" />
-            <span className="swork-label">
+          <div className="srecover-head">
+            <span className="srecover-title">
               {recovery.lost
                 ? t("overlay.recovery.title")
                 : t("tray.recentTranscripts")}
             </span>
-            <div className="sbase-r">
+            <button
+              className="sx"
+              aria-label={t("overlay.recovery.close")}
+              onClick={() => commands.dismissPasteRecovery()}
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path
+                  d="M4 4 L12 12 M12 4 L4 12"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+          </div>
+          <div className="srecover-list">
+            {recovery.texts.map((text, index) => (
               <button
-                className="sx"
-                aria-label={t("overlay.recovery.close")}
-                onClick={() => commands.dismissPasteRecovery()}
+                type="button"
+                className="srecover-row"
+                key={index}
+                onClick={() => commands.copyPasteRecoveryText(index)}
               >
-                <svg viewBox="0 0 16 16" aria-hidden="true">
-                  <path
-                    d="M4 4 L12 12 M12 4 L4 12"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                  />
-                </svg>
+                <span className="srecover-text">{text}</span>
+                <span className="scopy">{t("overlay.recovery.copy")}</span>
               </button>
-            </div>
+            ))}
           </div>
         </div>
       </div>
