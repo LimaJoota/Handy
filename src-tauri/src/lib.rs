@@ -325,6 +325,11 @@ fn initialize_core_logic(app_handle: &AppHandle) {
                     clipboard_history::paste_item(app, id);
                 }
             }
+            id if id.starts_with("paste_dictation:") => {
+                if let Ok(id) = id["paste_dictation:".len()..].parse() {
+                    clipboard_history::paste_dictation(app, id);
+                }
+            }
             "clear_copied" => {
                 clipboard_history::clear(app);
             }

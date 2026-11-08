@@ -44,6 +44,8 @@ pub const TRAY_ITEMS: usize = 10;
 const MAX_CHARS: usize = 20_000;
 /// Dictations this recent are left out: the tray lists them already.
 const RECENT_DICTATIONS: usize = 5;
+/// Dictations shown under the copies in the pointer menu.
+const MENU_DICTATIONS: usize = 3;
 
 /// Mirrors the `clipboard_history` setting, so the worker doesn't read the
 /// settings store twice a second.
@@ -161,34 +163,70 @@ fn keep(app: &AppHandle) -> usize {
         .clamp(1, MAX_KEEP)
 }
 
-/// Opens the history at the pointer. Picking a copy (or pressing its number)
-/// pastes it into the app in front.
+/// Opens the copies, and the last dictations under them, at the pointer.
+/// Picking one (or pressing its number) pastes it into the app in front.
 pub fn show_menu(app: &AppHandle) {
-    if !ENABLED.load(Ordering::Relaxed) {
-        return;
-    }
     #[cfg(target_os = "macos")]
     {
         let copies = recent(app, keep(app));
+        let dictations = recent_dictations(app);
         let locale = crate::settings::get_settings(app).app_language;
-        if let Err(err) = app.run_on_main_thread(move || macos::pop_up(&copies, locale)) {
+        if let Err(err) =
+            app.run_on_main_thread(move || macos::pop_up(&copies, &dictations, locale))
+        {
             error!("Failed to open the clipboard history menu: {err}");
+        }
+    }
+}
+
+/// The last dictations, newest first, as the pointer menu shows them.
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+fn recent_dictations(app: &AppHandle) -> Vec<Copied> {
+    let Some(history) = app.try_state::<Arc<HistoryManager>>() else {
+        return Vec::new();
+    };
+    match history.get_recent_completed_entries(MENU_DICTATIONS) {
+        Ok(entries) => entries
+            .iter()
+            .map(|entry| Copied {
+                id: entry.id,
+                text: crate::tray::last_transcript_text(entry).to_string(),
+                copied_at: entry.timestamp,
+            })
+            .collect(),
+        Err(err) => {
+            error!("Failed to read the recent dictations: {err}");
+            Vec::new()
         }
     }
 }
 
 /// Pastes the copy picked in the pointer menu.
 pub fn paste_item(app: &AppHandle, id: i64) {
+    paste_later(app, move |app| get(app, id));
+}
+
+/// Pastes the dictation picked in the pointer menu.
+pub fn paste_dictation(app: &AppHandle, id: i64) {
+    paste_later(app, move |app| {
+        let history = app.try_state::<Arc<HistoryManager>>()?;
+        let entry = tauri::async_runtime::block_on(history.get_entry_by_id(id)).ok()??;
+        Some(crate::tray::last_transcript_text(&entry).to_string())
+    });
+}
+
+/// Pastes what `find` returns, once the menu has closed.
+fn paste_later(app: &AppHandle, find: impl FnOnce(&AppHandle) -> Option<String> + Send + 'static) {
     let app = app.clone();
     std::thread::spawn(move || {
-        let Some(text) = get(&app, id) else {
-            error!("Clipboard history item {id} is gone");
+        let Some(text) = find(&app) else {
+            error!("The picked history item is gone");
             return;
         };
         #[cfg(target_os = "macos")]
         std::thread::sleep(PICK_SETTLE);
         if let Err(err) = crate::clipboard::paste_from_history(&text, &app) {
-            error!("Failed to paste a clipboard history item: {err}");
+            error!("Failed to paste a history item: {err}");
         }
     });
 }
@@ -556,13 +594,17 @@ mod macos {
     /// Shows the history as a native menu at the pointer: the newest
     /// [`MENU_GROUP`] with keys 1–9 and 0, older ones in submenus. AppKit runs
     /// the menu until it closes; the pick arrives as a menu event.
-    pub(super) fn pop_up(copies: &[Copied], locale: String) {
-        if let Err(err) = build_and_pop_up(copies, locale) {
+    pub(super) fn pop_up(copies: &[Copied], dictations: &[Copied], locale: String) {
+        if let Err(err) = build_and_pop_up(copies, dictations, locale) {
             error!("Failed to show the clipboard history menu: {err}");
         }
     }
 
-    fn build_and_pop_up(copies: &[Copied], locale: String) -> muda::Result<()> {
+    fn build_and_pop_up(
+        copies: &[Copied],
+        dictations: &[Copied],
+        locale: String,
+    ) -> muda::Result<()> {
         use muda::accelerator::{Accelerator, Code};
         use muda::{ContextMenu, Menu, MenuItem, PredefinedMenuItem, Submenu};
         use objc2::MainThreadMarker;
@@ -583,14 +625,24 @@ mod macos {
             Code::Digit0,
         ];
         let strings = crate::tray_i18n::get_tray_translations(Some(locale));
-        let item = |copy: &Copied, key: Option<Code>| {
+        let item = |id: String, text: &str, at: i64, key: Option<Code>| {
             MenuItem::with_id(
-                format!("paste_copied:{}", copy.id),
-                crate::tray::menu_label(&shown(&copy.text), copy.copied_at),
+                id,
+                crate::tray::menu_label(text, at),
                 true,
                 key.map(|code| Accelerator::new(None, code)),
             )
         };
+        let copy_item = |copy: &Copied, key: Option<Code>| {
+            item(
+                format!("paste_copied:{}", copy.id),
+                &shown(&copy.text),
+                copy.copied_at,
+                key,
+            )
+        };
+        // Numbers run down the copies first, then on to the dictations.
+        let mut keys = KEYS.into_iter();
 
         let menu = Menu::new();
         menu.append(&MenuItem::with_id(
@@ -600,16 +652,33 @@ mod macos {
             None,
         ))?;
         let (first, rest) = copies.split_at(copies.len().min(MENU_GROUP));
-        for (copy, key) in first.iter().zip(KEYS) {
-            menu.append(&item(copy, Some(key)))?;
+        for copy in first {
+            menu.append(&copy_item(copy, keys.next()))?;
         }
         for (group, chunk) in rest.chunks(MENU_GROUP).enumerate() {
             let start = MENU_GROUP * (group + 1) + 1;
             let submenu = Submenu::new(format!("{start}–{}", start + chunk.len() - 1), true);
             for copy in chunk {
-                submenu.append(&item(copy, None))?;
+                submenu.append(&copy_item(copy, None))?;
             }
             menu.append(&submenu)?;
+        }
+        if !dictations.is_empty() {
+            menu.append(&PredefinedMenuItem::separator())?;
+            menu.append(&MenuItem::with_id(
+                "recent_transcripts",
+                &strings.recent_transcripts,
+                false,
+                None,
+            ))?;
+            for dictation in dictations {
+                menu.append(&item(
+                    format!("paste_dictation:{}", dictation.id),
+                    &dictation.text,
+                    dictation.copied_at,
+                    keys.next(),
+                ))?;
+            }
         }
         menu.append(&PredefinedMenuItem::separator())?;
         menu.append(&MenuItem::with_id(
