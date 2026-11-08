@@ -1028,7 +1028,7 @@ impl ShortcutAction for CancelAction {
 
 // Test Action
 /// Brings back the last few transcripts in the overlay's recovery card, for
-/// a paste that didn't land. Nothing touches the clipboard until Copy.
+/// a paste that didn't land. Clicking one pastes it.
 struct ShowLastTranscriptAction;
 
 impl ShortcutAction for ShowLastTranscriptAction {

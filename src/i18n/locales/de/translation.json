@@ -1027,7 +1027,7 @@
     "loadingModel": "Modell wird geladen...",
     "recovery": {
       "title": "Nicht eingefügt?",
-      "copy": "Kopieren",
+      "paste": "Einfügen",
       "close": "Schließen"
     }
   },

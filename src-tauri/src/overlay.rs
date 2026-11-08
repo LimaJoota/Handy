@@ -8,7 +8,6 @@ use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, PhysicalSize};
-use tauri_plugin_clipboard_manager::ClipboardExt;
 
 #[cfg(not(target_os = "macos"))]
 use log::debug;
@@ -109,10 +108,9 @@ struct RecoveryPayload {
     lost: bool,
 }
 
-/// Shows the last few transcripts in the overlay, each with a Copy button.
+/// Shows the last few transcripts in the overlay; clicking one pastes it.
 /// `lost` is a paste that may not have landed and goes first; the rest come
-/// from History. The clipboard is only written if the user clicks Copy, so
-/// whatever they had copied (a key, say) is left alone. Skipped while a new
+/// from History. Nothing is pasted or copied until the user clicks. Skipped while a new
 /// recording owns the overlay; everything is in History either way.
 pub fn show_paste_recovery(app_handle: &AppHandle, lost: Option<&str>) {
     if app_handle
@@ -160,11 +158,13 @@ pub fn show_paste_recovery(app_handle: &AppHandle, lost: Option<&str>) {
     show_overlay_state(app_handle, "recovery");
 }
 
-/// Copies the recovery card's `index`th transcript (the user clicked its Copy)
-/// and closes the card.
+/// Pastes the recovery card's `index`th transcript (the user clicked its row)
+/// into the app in front and closes the card. The card never takes focus, so
+/// the paste lands where the user is working, with the same paste method and
+/// clipboard handling as a dictation.
 #[tauri::command]
 #[specta::specta]
-pub fn copy_paste_recovery_text(app: AppHandle, index: u32) -> Result<(), String> {
+pub fn paste_recovery_text(app: AppHandle, index: u32) -> Result<(), String> {
     let text = RECOVERY_TEXTS
         .lock()
         .ok()
@@ -174,12 +174,29 @@ pub fn copy_paste_recovery_text(app: AppHandle, index: u32) -> Result<(), String
             text
         })
         .ok_or("No transcript to recover")?;
-    app.clipboard()
-        .write_text(text)
-        .map_err(|e| format!("Failed to copy transcript: {e}"))?;
     hide_recording_overlay(&app);
+    std::thread::spawn(move || {
+        // Lets the click finish before the paste keys go out.
+        std::thread::sleep(RECOVERY_PASTE_SETTLE);
+        match crate::utils::paste(text, app.clone()) {
+            Ok(()) => crate::notices::clear(&app, crate::notices::NoticeSource::Dictation),
+            Err(e) => {
+                log::error!("Failed to paste a recovered transcript: {e}");
+                crate::notices::raise(
+                    &app,
+                    Notice::new(
+                        crate::notices::NoticeCode::PasteFailed,
+                        crate::notices::NoticeSource::Dictation,
+                    ),
+                );
+            }
+        }
+    });
     Ok(())
 }
+
+/// Pause between the click on a recovery row and its paste.
+const RECOVERY_PASTE_SETTLE: Duration = Duration::from_millis(120);
 
 /// Closes the recovery card (its close button or timeout) without copying.
 #[tauri::command]

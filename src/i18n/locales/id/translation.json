@@ -1027,7 +1027,7 @@
     "loadingModel": "Memuat model...",
     "recovery": {
       "title": "Tidak tertempel?",
-      "copy": "Salin",
+      "paste": "Tempel",
       "close": "Tutup"
     }
   },

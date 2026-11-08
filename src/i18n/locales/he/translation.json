@@ -1027,7 +1027,7 @@
     "loadingModel": "טוען מודל...",
     "recovery": {
       "title": "לא הודבק?",
-      "copy": "העתק",
+      "paste": "הדבק",
       "close": "סגור"
     }
   },

@@ -1027,7 +1027,7 @@
     "loadingModel": "Model yükleniyor...",
     "recovery": {
       "title": "Yapıştırılmadı mı?",
-      "copy": "Kopyala",
+      "paste": "Yapıştır",
       "close": "Kapat"
     }
   },

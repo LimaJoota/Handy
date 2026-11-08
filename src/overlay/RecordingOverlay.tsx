@@ -383,7 +383,7 @@ const RecordingOverlay: React.FC = () => {
     : undefined;
 
   // ---- Paste recovery: the transcripts that may not have landed. A click
-  // anywhere on a row copies it; nothing touches the clipboard before that.
+  // anywhere on a row pastes it into the app in front.
   if (state === "recovery") {
     return (
       <div dir={direction} className={`ov-stage ${position}`}>
@@ -419,10 +419,10 @@ const RecordingOverlay: React.FC = () => {
                 type="button"
                 className="srecover-row"
                 key={index}
-                onClick={() => commands.copyPasteRecoveryText(index)}
+                onClick={() => commands.pasteRecoveryText(index)}
               >
                 <span className="srecover-text">{text}</span>
-                <span className="scopy">{t("overlay.recovery.copy")}</span>
+                <span className="scopy">{t("overlay.recovery.paste")}</span>
               </button>
             ))}
           </div>

@@ -1027,7 +1027,7 @@
     "loadingModel": "正在加载模型...",
     "recovery": {
       "title": "没有粘贴上？",
-      "copy": "复制",
+      "paste": "粘贴",
       "close": "关闭"
     }
   },

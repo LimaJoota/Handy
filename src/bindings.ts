@@ -611,12 +611,14 @@ async cancelOperation() : Promise<void> {
     await TAURI_INVOKE("cancel_operation");
 },
 /**
- * Copies the recovery card's `index`th transcript (the user clicked its Copy)
- * and closes the card.
+ * Pastes the recovery card's `index`th transcript (the user clicked its row)
+ * into the app in front and closes the card. The card never takes focus, so
+ * the paste lands where the user is working, with the same paste method and
+ * clipboard handling as a dictation.
  */
-async copyPasteRecoveryText(index: number) : Promise<Result<null, string>> {
+async pasteRecoveryText(index: number) : Promise<Result<null, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("copy_paste_recovery_text", { index }) };
+    return { status: "ok", data: await TAURI_INVOKE("paste_recovery_text", { index }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };

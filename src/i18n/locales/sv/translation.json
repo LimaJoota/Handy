@@ -1027,7 +1027,7 @@
     "loadingModel": "Laddar modell...",
     "recovery": {
       "title": "Klistrades inte in?",
-      "copy": "Kopiera",
+      "paste": "Klistra in",
       "close": "Stäng"
     }
   },

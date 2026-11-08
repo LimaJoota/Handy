@@ -782,7 +782,7 @@ pub fn run(cli_args: CliArgs) {
             trigger_update_check,
             show_main_window_command,
             commands::cancel_operation,
-            overlay::copy_paste_recovery_text,
+            overlay::paste_recovery_text,
             overlay::dismiss_paste_recovery,
             commands::is_portable,
             commands::is_update_checks_locked,

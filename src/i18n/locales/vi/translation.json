@@ -1027,7 +1027,7 @@
     "loadingModel": "Đang tải mô hình...",
     "recovery": {
       "title": "Chưa dán được?",
-      "copy": "Sao chép",
+      "paste": "Dán",
       "close": "Đóng"
     }
   },

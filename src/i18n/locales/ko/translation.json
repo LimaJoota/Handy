@@ -1027,7 +1027,7 @@
     "loadingModel": "모델 로딩 중...",
     "recovery": {
       "title": "붙여넣지 못했나요?",
-      "copy": "복사",
+      "paste": "붙여넣기",
       "close": "닫기"
     }
   },
